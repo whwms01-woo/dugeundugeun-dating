@@ -36,7 +36,11 @@ const sourceImages = {
     'partner_female_sp.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_sp_1779174665769.png',
     'partner_male_sp.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_sp_1779174713138.png',
     'partner_female_sj.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_sj_1779174692215.png',
-    'partner_male_sj.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_sj_1779174733393.png'
+    'partner_male_sj.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_sj_1779174733393.png',
+    'partner_female_nf_e.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\5842f668-c723-4a09-b615-d1b27c9fce7c\\partner_female_nf_e_1779179088405.png',
+    'partner_male_nf_e.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\5842f668-c723-4a09-b615-d1b27c9fce7c\\partner_male_nf_e_1779179114366.png',
+    'partner_female_nt_e.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\5842f668-c723-4a09-b615-d1b27c9fce7c\\partner_female_nt_e_1779179136170.png',
+    'partner_male_nt_e.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\5842f668-c723-4a09-b615-d1b27c9fce7c\\partner_male_nt_e_1779179158064.png'
 };
 
 for (const [destName, srcPath] of Object.entries(sourceImages)) {

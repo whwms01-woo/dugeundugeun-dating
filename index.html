@@ -1994,10 +1994,14 @@
             const sjMbtis = ['ISFJ', 'ISTJ', 'ESFJ', 'ESTJ'];
             
             let mbtiGroup = 'nf';
-            if (nfMbtis.includes(partnerMbti)) {
+            if (['INFJ', 'INFP'].includes(partnerMbti)) {
                 mbtiGroup = 'nf';
-            } else if (ntMbtis.includes(partnerMbti)) {
+            } else if (['ENFP', 'ENFJ'].includes(partnerMbti)) {
+                mbtiGroup = 'nf_e';
+            } else if (['INTJ', 'INTP'].includes(partnerMbti)) {
                 mbtiGroup = 'nt';
+            } else if (['ENTP', 'ENTJ'].includes(partnerMbti)) {
+                mbtiGroup = 'nt_e';
             } else if (spMbtis.includes(partnerMbti)) {
                 mbtiGroup = 'sp';
             } else if (sjMbtis.includes(partnerMbti)) {
