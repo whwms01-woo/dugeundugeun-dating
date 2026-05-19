@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두근두근 대작전 💖 - AI소개팅 연애시뮬레이터</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+        :root {
+            --bg-color: #0b071a;
+            --panel-bg: rgba(20, 15, 38, 0.6);
+            --border-glow: rgba(255, 75, 120, 0.3);
+            --primary: #ff4b78;
+            --primary-glow: rgba(255, 75, 120, 0.6);
+            --secondary: #9061ff;
+            --secondary-glow: rgba(144, 97, 255, 0.6);
+            --text-main: #f5f3f7;
+            --text-muted: #a69bb8;
+            --accent-green: #00f2fe;
+            --accent-orange: #ff9f43;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #070412 0%, #120b26 50%, #070412 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient glowing circles */
+        .ambient-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(120px);
+            z-index: 0;
+            opacity: 0.4;
+        }
+        .glow-1 {
+            background: var(--primary);
+            top: -10%;
+            left: -10%;
+            animation: pulse-glow 8s infinite alternate;
+        }
+        .glow-2 {
+            background: var(--secondary);
+            bottom: -10%;
+            right: -10%;
+            animation: pulse-glow 8s infinite alternate-reverse;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.3; }
+            100% { transform: scale(1.2) translate(50px, 30px); opacity: 0.5; }
+        }
+
+        header {
+            text-align: center;
+            padding: 25px 20px;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff4b78 0%, #c15eff 50%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 75, 120, 0.3);
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        main {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px 40px;
+            z-index: 10;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* SECTION: 1. Setup Form */
+        .setup-section {
+            display: none;
+            padding: 40px;
+            animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff 0%, #d1c8eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-control {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 75, 120, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        select.input-control {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a69bb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 45px;
+        }
+
+        select.input-control option {
+            background-color: #140f26;
+            color: #fff;
+        }
+
+        /* Card Scenario Choice */
+        .scenario-container {
+            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 120px;
+        }
+
+        .scenario-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(144, 97, 255, 0.4);
+            transform: translateY(-4px);
+        }
+
+        .scenario-card.selected {
+            background: rgba(255, 75, 120, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 10px 25px rgba(255, 75, 120, 0.15);
+        }
+
+        .scenario-emoji {
+            font-size: 2rem;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .scenario-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .start-btn {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--primary) 0%, #d82b6b 50%, var(--secondary) 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 75, 120, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(255, 75, 120, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .start-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* SECTION: 2. Game View */
+        .game-section {
+            display: none;
+            grid-template-columns: 350px 1fr;
+            min-height: 550px;
+        }
+
+        /* Left profile panel */
+        .profile-panel {
+            background: rgba(10, 5, 25, 0.4);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .profile-avatar-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .avatar-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #181135 0%, #2f2557 100%);
+            border: 3px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            position: relative;
+            box-shadow: 0 0 25px rgba(144, 97, 255, 0.2);
+            transition: all 0.5s ease;
+            overflow: hidden; /* crop the avatar picture beautifully! */
+        }
+
+        .partner-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            transition: transform 0.5s ease;
+        }
+
+        .partner-avatar-img:hover {
+            transform: scale(1.1);
+        }
+
+        .heartbeat-element {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            animation: beat 1.2s infinite;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        @keyframes beat {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+
+        .profile-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-mbti-badge {
+            background: rgba(144, 97, 255, 0.15);
+            border: 1px solid rgba(144, 97, 255, 0.4);
+            color: #c19eff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 800;
+            padding: 4px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 8px;
+            box-shadow: 0 0 15px rgba(144, 97, 255, 0.1);
+        }
+
+        .profile-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Heart rate widget */
+        .heart-rate-widget {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .heart-rate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .heart-rate-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(255, 75, 120, 0.3);
+        }
+
+        .heart-rate-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .heart-rate-bar-fill {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* Floating Score Delta */
+        .delta-floating {
+            position: absolute;
+            right: 18px;
+            top: -15px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.8s ease;
+        }
+        .delta-floating.show-positive {
+            animation: floatUpGreen 1.5s forwards;
+        }
+        .delta-floating.show-negative {
+            color: #ff5252;
+            animation: floatUpRed 1.5s forwards;
+        }
+
+        @keyframes floatUpGreen {
+            0% { opacity: 0; transform: translateY(10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(-10px); }
+            100% { opacity: 0; transform: translateY(-25px); }
+        }
+        @keyframes floatUpRed {
+            0% { opacity: 0; transform: translateY(10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(-10px); }
+            100% { opacity: 0; transform: translateY(-25px); }
+        }
+
+        /* Progress count */
+        .progress-indicator {
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Inner thought block */
+        .thought-bubble-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(144, 97, 255, 0.3);
+            border-radius: 14px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .thought-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .thought-content {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        /* Right Chat Panel */
+        .chat-panel {
+            display: flex;
+            flex-direction: column;
+            height: 580px;
+        }
+
+        .chat-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .scenario-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(10, 5, 25, 0.1);
+        }
+
+        /* Custom Scrollbar for Chat Box */
+        .chat-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+        }
+        .chat-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: messageFadeIn 0.4s ease forwards;
+        }
+
+        @keyframes messageFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.partner {
+            align-self: flex-start;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message-sender {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .message.user .message-sender {
+            align-self: flex-end;
+        }
+
+        .message-bubble {
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        .message.partner .message-bubble {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-top-left-radius: 4px;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--primary) 0%, #db3361 100%);
+            color: #fff;
+            border-top-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(255, 75, 120, 0.2);
+        }
+
+        /* Typing indicator */
+        .typing-loader {
+            display: none;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 18px;
+            border-radius: 18px;
+            border-top-left-radius: 4px;
+        }
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            height: 10px;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: dotPulse 1.2s infinite ease-in-out;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.4; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .chat-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 12px;
+            background: rgba(10, 5, 25, 0.2);
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--secondary);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 15px rgba(144, 97, 255, 0.15);
+        }
+
+        .send-btn {
+            background: var(--secondary);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 700;
+            padding: 0 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(144, 97, 255, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .send-btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 8px 20px rgba(144, 97, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* SECTION: 3. Result Section */
+        .result-section {
+            display: none;
+            padding: 40px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .result-badge {
+            background: rgba(255, 75, 120, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            padding: 8px 30px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            box-shadow: 0 0 30px rgba(255, 75, 120, 0.25);
+            margin-bottom: 30px;
+            text-align: center;
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 75, 120, 0.2); }
+            50% { box-shadow: 0 0 35px rgba(255, 75, 120, 0.4); }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-circle-box {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-svg {
+            transform: rotate(-90deg);
+            width: 90px;
+            height: 90px;
+        }
+
+        .stat-svg-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 8;
+        }
+
+        .stat-svg-fill {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1.5s ease-out;
+        }
+
+        .stat-svg-fill.flutter {
+            stroke: var(--secondary);
+        }
+
+        .stat-svg-fill.frustrate {
+            stroke: var(--accent-orange);
+        }
+
+        .stat-num {
+            position: absolute;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .stat-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* Review and Prediction Card */
+        .feedback-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            margin-bottom: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .feedback-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .feedback-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .feedback-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #e2daeb;
+            word-break: keep-all;
+        }
+
+        .prediction-block {
+            background: rgba(144, 97, 255, 0.06);
+            border: 1px solid rgba(144, 97, 255, 0.15);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .prediction-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .prediction-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #d1fffd;
+            word-break: keep-all;
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 14px 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            z-index: 10;
+        }
+
+        /* WATERMARK */
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 700;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+            z-index: 100;
+        }
+
+        /* Cover Art Container */
+        .dating-cover-container {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 75, 120, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            aspect-ratio: 16 / 9;
+            background: #110926;
+        }
+
+        .dating-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 20%;
+            transition: transform 0.8s ease;
+        }
+
+        .dating-cover-container:hover .dating-cover-img {
+            transform: scale(1.05);
+        }
+
+        .dating-cover-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(360deg, rgba(11, 7, 26, 0.95) 0%, rgba(11, 7, 26, 0.4) 50%, rgba(11, 7, 26, 0) 100%);
+            padding: 20px 25px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .cover-tag {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(255, 75, 120, 0.3);
+        }
+
+        /* Landing Section Styling */
+        .landing-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dating-cover-landing {
+            width: 100%;
+            max-width: 480px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 75, 120, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            aspect-ratio: 4 / 5;
+            background: #110926;
+            margin-bottom: 30px;
+        }
+
+        .dating-cover-img-landing {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 1.2s ease;
+        }
+
+        .dating-cover-landing:hover .dating-cover-img-landing {
+            transform: scale(1.05);
+        }
+
+        .landing-text-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(360deg, rgba(11, 7, 26, 0.95) 0%, rgba(11, 7, 26, 0.5) 60%, rgba(11, 7, 26, 0) 100%);
+            padding: 40px 30px 30px;
+            text-align: center;
+        }
+
+        .landing-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff4b78 0%, #c15eff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 35px rgba(255, 75, 120, 0.5);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .landing-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .landing-start-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #db3361 50%, var(--secondary) 100%);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 800;
+            padding: 16px 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 35px rgba(255, 75, 120, 0.4);
+            animation: pulse-button 2s infinite;
+        }
+
+        .landing-start-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 15px 40px rgba(255, 75, 120, 0.6);
+            filter: brightness(1.1);
+        }
+
+        @keyframes pulse-button {
+            0% { box-shadow: 0 0 0 0 rgba(255, 75, 120, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 75, 120, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 75, 120, 0); }
+        }
+
+        /* RESPONSIVE LAYOUTS */
+        @media (max-width: 800px) {
+            .setup-grid {
+                grid-template-columns: 1fr;
+            }
+            .scenario-container, .start-btn {
+                grid-column: span 1;
+            }
+            .scenario-grid {
+                grid-template-columns: 1fr;
+            }
+            .game-section {
+                grid-template-columns: 1fr;
+            }
+            .profile-panel {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                padding: 25px;
+            }
+            .chat-panel {
+                height: 480px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .ambient-glow {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient blur lights -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <header>
+        <h1>두근두근 대작전 💖</h1>
+        <p>AI와 소개팅으로 연애세포를 깨워보세요.</p>
+    </header>
+
+    <main>
+        <div class="container">
+            
+            <!-- SECTION 0: Landing Section -->
+            <div id="landing-section" class="landing-section">
+                <div class="dating-cover-landing">
+                    <img src="/assets/dating_main.png" alt="두근두근 대작전 포스터" class="dating-cover-img-landing">
+                </div>
+                <button class="landing-start-btn" onclick="goToSetup()">
+                    <span>연애하러 가기 💖</span>
+                </button>
+            </div>
+            
+            <!-- SECTION 1: Setup Form -->
+            <div id="setup-section" class="setup-section">
+                <!-- Premium Otome Game Style Cover Art -->
+                <div class="dating-cover-container">
+                    <img src="/assets/dating_main.png" alt="두근두근 대작전 커버 아트" class="dating-cover-img">
+                    <div class="dating-cover-overlay">
+                        <span class="cover-tag">AI 연애학개론</span>
+                    </div>
+                </div>
+                
+                <h2 class="section-title">✨ 매칭 카드 설정</h2>
+                
+                <div class="setup-grid">
+                    <div class="input-group">
+                        <label for="user-name">내 이름</label>
+                        <input type="text" id="user-name" class="input-control" placeholder="예) 우경석">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="user-gender">내 성별</label>
+                        <select id="user-gender" class="input-control">
+                            <option value="남성">남성 🙋‍♂️</option>
+                            <option value="여성">여성 🙋‍♀️</option>
+                            <option value="상관없음">기타 🌈</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="user-mbti">내 MBTI</label>
+                        <select id="user-mbti" class="input-control">
+                            <option value="ENFP">ENFP - 인간 골든 리트리버 🐶</option>
+                            <option value="INFJ">INFJ - 겉차속따 신비주의자 🔮</option>
+                            <option value="INTJ">INTJ - 이성적 전략가 🤖</option>
+                            <option value="INFP">INFP - 낭만적인 몽상가 🦄</option>
+                            <option value="ISFP">ISFP - 자유로운 영혼의 예술가 🎨</option>
+                            <option value="ENFJ">ENFJ - 다정한 리더 🌟</option>
+                            <option value="ENTP">ENTP - 뜨거운 논쟁가 🔥</option>
+                            <option value="ESTP">ESTP - 직진 플러팅 야생마 🏎️</option>
+                            <option value="ESFP">ESFP - 분위기 메이커 🎉</option>
+                            <option value="ISTP">ISTP - 츤데레 장인 🛠️</option>
+                            <option value="ISFJ">ISFJ - 다정한 조력자 🧸</option>
+                            <option value="ISTJ">ISTJ - 원칙주의자 📊</option>
+                            <option value="ENTJ">ENTJ - 열정적인 기획자 👑</option>
+                            <option value="ESFJ">ESFJ - 친절한 핵인싸 🤝</option>
+                            <option value="ESTJ">ESTJ - 냉철한 관리자 💼</option>
+                            <option value="INTP">INTP - 호기심 많은 분석가 🧠</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="partner-mbti">소개팅 상대방 MBTI</label>
+                        <select id="partner-mbti" class="input-control">
+                            <option value="INFJ">INFJ - 감성 풍부 차분한 매력 🔮</option>
+                            <option value="ENFP">ENFP - 에너제틱 하이텐션 리트리버 🐶</option>
+                            <option value="INTJ">INTJ - 차갑지만 호기심 생기는 팩폭러 🤖</option>
+                            <option value="ESTP">ESTP - 심쿵하게 만드는 직진 플러팅 🏎️</option>
+                            <option value="INFP">INFP - 따뜻하고 수줍은 낭만주의자 🦄</option>
+                            <option value="ISFP">ISFP - 편안하고 다정한 예술가 🎨</option>
+                            <option value="ENFJ">ENFJ - 자상하게 챙겨주는 핵스윗 🌟</option>
+                            <option value="ENTP">ENTP - 톡톡 튀고 재밌는 드립 장인 🔥</option>
+                            <option value="ESFP">ESFP - 지루할 틈 없는 흥부자 🎉</option>
+                            <option value="ISTP">ISTP - 시크하지만 뒤에서 챙겨주는 츤데레 🛠️</option>
+                            <option value="ISFJ">ISFJ - 배려심 넘치고 편안한 메이트 🧸</option>
+                            <option value="ISTJ">ISTJ - 신뢰감 100% 진중한 타입 📊</option>
+                            <option value="ENTJ">ENTJ - 똑부러지고 자신감 넘치는 걸크/남크 👑</option>
+                            <option value="ESFJ">ESFJ - 공감 요정 리액션 대왕 🤝</option>
+                            <option value="ESTJ">ESTJ - 깔끔하고 똑똑한 오피스 브레인 💼</option>
+                            <option value="INTP">INTP - 엉뚱하고 귀여운 아이디어 뱅크 🧠</option>
+                        </select>
+                    </div>
+
+                    <div class="scenario-container">
+                        <label>소개팅 매칭 장소</label>
+                        <div class="scenario-grid">
+                            <div class="scenario-card selected" onclick="selectScenario(this, '☕ 어색함이 감도는 인스타 핫플 성수동 감성 카페')">
+                                <span class="scenario-emoji">☕</span>
+                                <span class="scenario-name">성수동 핫플 카페</span>
+                            </div>
+                            <div class="scenario-card" onclick="selectScenario(this, '🍷 단둘이 묘한 텐션이 흐르는 합정동 와인바')">
+                                <span class="scenario-emoji">🍷</span>
+                                <span class="scenario-name">합정 와인바</span>
+                            </div>
+                            <div class="scenario-card" onclick="selectScenario(this, '🏡 돗자리 깔고 치맥 한 잔 하는 노을 지는 한강공원')">
+                                <span class="scenario-emoji">🏡</span>
+                                <span class="scenario-name">한강공원 피크닉</span>
+                            </div>
+                            <div class="scenario-card" onclick="selectScenario(this, '🍺 시끌벅적 야외 낭만이 가득한 웨이팅 2시간 골목 야장')">
+                                <span class="scenario-emoji">🍺</span>
+                                <span class="scenario-name">을지로 야장 포차</span>
+                            </div>
+                            <div class="scenario-card" onclick="selectScenario(this, '🎡 왁자지껄 눈치게임 대성공한 환상의 테마파크')">
+                                <span class="scenario-emoji">🎡</span>
+                                <span class="scenario-name">환상의 테마파크</span>
+                            </div>
+                            <div class="scenario-card" onclick="selectScenario(this, '🎪 어깨가 닿는 아기자기한 성수동 캐릭터 팝업스토어')">
+                                <span class="scenario-emoji">🎪</span>
+                                <span class="scenario-name">성수동 팝업스토어</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="start-btn" onclick="startDating()">
+                        <span>매칭 시작하기 💖</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Game View -->
+            <div id="game-section" class="game-section">
+                <!-- Left profile panel -->
+                <div class="profile-panel">
+                    <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                        <div class="profile-avatar-container">
+                            <div id="partner-avatar" class="avatar-circle">🔮</div>
+                            <div class="heartbeat-element">💓</div>
+                        </div>
+
+                        <div class="profile-info">
+                            <div id="partner-mbti-badge" class="profile-mbti-badge">INFJ</div>
+                            <div id="partner-desc" class="profile-desc">소개팅 상대방</div>
+                        </div>
+
+                        <div class="heart-rate-widget">
+                            <div class="heart-rate-header">
+                                <span>설렘 지수(호감도)</span>
+                                <span id="heart-rate-val" class="heart-rate-val">50%</span>
+                            </div>
+                            <div class="heart-rate-bar-bg">
+                                <div id="heart-rate-bar" class="heart-rate-bar-fill"></div>
+                            </div>
+                            <div id="delta-floating" class="delta-floating">+10%</div>
+                        </div>
+
+                        <div id="progress-indicator" class="progress-indicator">
+                            대화 진행: 0 / 5
+                        </div>
+                    </div>
+
+                    <div class="thought-bubble-container">
+                        <div class="thought-title">🔍 상대방의 리얼 속마음</div>
+                        <div id="thought-content" class="thought-content">과연 나에게 어떤 첫인상을 느꼈을까...?</div>
+                    </div>
+                </div>
+
+                <!-- Right chat panel -->
+                <div class="chat-panel">
+                    <div class="chat-header">
+                        <div style="font-weight: 700;">소개팅 진행 중</div>
+                        <div id="scenario-badge" class="scenario-badge">☕ 감성 카페</div>
+                    </div>
+
+                    <div id="chat-body" class="chat-body">
+                        <!-- Messages go here -->
+                        
+                        <!-- Typing loader -->
+                        <div id="typing-loader" class="typing-loader">
+                            <div class="typing-dots">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-footer">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="대화를 입력해주세요..." onkeydown="if(event.key === 'Enter') sendMessage()">
+                        <button class="send-btn" onclick="sendMessage()">
+                            <span>전송</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: Result View -->
+            <div id="result-section" class="result-section">
+                <h2 class="section-title" style="margin-bottom: 10px;">📊 소개팅 최종 성적표</h2>
+                <div id="result-badge" class="result-badge">Green Light! 🟢</div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-circle-box">
+                            <svg class="stat-svg">
+                                <circle class="stat-svg-bg" cx="45" cy="45" r="40"></circle>
+                                <circle id="stat-fill-sense" class="stat-svg-fill" cx="45" cy="45" r="40"></circle>
+                            </svg>
+                            <span id="stat-val-sense" class="stat-num">0%</span>
+                        </div>
+                        <span class="stat-name">💬 대화 센스</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-circle-box">
+                            <svg class="stat-svg">
+                                <circle class="stat-svg-bg" cx="45" cy="45" r="40"></circle>
+                                <circle id="stat-fill-flutter" class="stat-svg-fill flutter" cx="45" cy="45" r="40"></circle>
+                            </svg>
+                            <span id="stat-val-flutter" class="stat-num">0%</span>
+                        </div>
+                        <span class="stat-name">🔥 심쿵 설렘</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-circle-box">
+                            <svg class="stat-svg">
+                                <circle class="stat-svg-bg" cx="45" cy="45" r="40"></circle>
+                                <circle id="stat-fill-frustrate" class="stat-svg-fill frustrate" cx="45" cy="45" r="40"></circle>
+                            </svg>
+                            <span id="stat-val-frustrate" class="stat-num">0%</span>
+                        </div>
+                        <span class="stat-name">🍠 고구마 답답</span>
+                    </div>
+                </div>
+
+                <div class="feedback-card">
+                    <div class="feedback-block">
+                        <div class="feedback-label">🧠 AI 연애 카운셀러의 커플 총평</div>
+                        <div id="result-summary" class="feedback-text">두 사람 사이에 미묘한 기류가 흘렀습니다...</div>
+                    </div>
+
+                    <div class="prediction-block">
+                        <div class="prediction-label">🔮 10년 뒤 두 사람의 모습 예측</div>
+                        <div id="result-prediction" class="prediction-text">서로의 카톡 프로필을 몰래 훔쳐보는 중...</div>
+                    </div>
+                </div>
+
+                <button class="reset-btn" onclick="resetGame()">처음으로 가기</button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Watermark -->
+    <div class="watermark">제작자: 우경석</div>
+
+    <script>
+        // State variables
+        let selectedScenarioText = '☕ 어색함이 감도는 인스타 핫플 성수동 감성 카페';
+        let currentHeartRate = 50;
+        let dialogueTurnCount = 0;
+        let maxTurns = 5;
+        let dialogueHistory = []; // [ { sender: 'user'|'partner', text: string } ]
+        
+        let userName = '';
+        let userGender = '';
+        let userMbti = '';
+        let partnerMbti = '';
+
+        // MBTI Avatars Map
+        const avatarMap = {
+            'INFJ': '🔮', 'ENFP': '🐶', 'INTJ': '🤖', 'ESTP': '🏎️',
+            'INFP': '🦄', 'ISFP': '🎨', 'ENFJ': '🌟', 'ENTP': '🔥',
+            'ESFP': '🎉', 'ISTP': '🛠️', 'ISFJ': '🧸', 'ISTJ': '📊',
+            'ENTJ': '👑', 'ESFJ': '🤝', 'ESTJ': '💼', 'INTP': '🧠'
+        };
+
+        const descMap = {
+            'INFJ': '신비롭고 생각이 깊은 다정한 감성가',
+            'ENFP': '에너지가 통통 튀는 인간 골든 리트리버',
+            'INTJ': '논리 100% 똑똑하지만 차가운 팩폭 전략가',
+            'ESTP': '유쾌하고 당찬 본능적 직진 플러팅의 대가',
+            'INFP': '부끄러움 많지만 내면이 깊은 로맨티시스트',
+            'ISFP': '따뜻하고 부드러운 다정다감 예술가',
+            'ENFJ': '다정하게 당신을 챙겨주는 댕댕이 리더',
+            'ENTP': '장난기 가득하고 재치 있는 아이디어 뱅크',
+            'ESFP': '유쾌한 입담과 미소를 잃지 않는 핵인싸',
+            'ISTP': '겉으론 시크하지만 뒤로 조용히 챙겨주는 츤데레',
+            'ISFJ': '배려와 공감 능력이 훌륭한 마음 치유사',
+            'ISTJ': '진중하고 철두철미해서 믿음직한 타입',
+            'ENTJ': '똑부러지는 기획과 당당한 매력의 카리스마 리더',
+            'ESFJ': '풍부한 공감과 엄청난 리액션의 공감 천사',
+            'ESTJ': '냉철하고 성실하게 삶을 설계하는 스마트 브레인',
+            'INTP': '분석하길 좋아하고 엉뚱한 귀여움이 있는 뇌섹남녀'
+        };
+
+        // Select Scenario Handler
+        function selectScenario(el, text) {
+            document.querySelectorAll('.scenario-card').forEach(card => card.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedScenarioText = text;
+        }
+
+        // Start Game
+        async function startDating() {
+            userName = document.getElementById('user-name').value.trim();
+            userGender = document.getElementById('user-gender').value;
+            userMbti = document.getElementById('user-mbti').value;
+            partnerMbti = document.getElementById('partner-mbti').value;
+
+            if (!userName) {
+                alert('내 이름을 입력해주세요!');
+                return;
+            }
+
+            // Determine dynamic anime character portrait based on gender and MBTI group
+            const partnerGender = (userGender === '남성') ? '여성' : (userGender === '여성' ? '남성' : '여성');
+            const emotionalMbtis = ['ENFP', 'INFJ', 'INFP', 'ENFJ', 'ESTP', 'ESFP', 'ISFP', 'ISTP'];
+            const isEmotional = emotionalMbtis.includes(partnerMbti);
+            
+            let partnerImgSrc = '';
+            if (partnerGender === '여성') {
+                partnerImgSrc = isEmotional ? '/assets/partner_female_nf.png' : '/assets/partner_female_nt.png';
+            } else {
+                partnerImgSrc = isEmotional ? '/assets/partner_male_nf.png' : '/assets/partner_male_nt.png';
+            }
+            document.getElementById('partner-avatar').innerHTML = `<img src="${partnerImgSrc}" alt="${partnerMbti}" class="partner-avatar-img">`;
+            document.getElementById('partner-mbti-badge').innerText = partnerMbti;
+            document.getElementById('partner-desc').innerText = descMap[partnerMbti] || '소개팅 상대방';
+            document.getElementById('scenario-badge').innerText = selectedScenarioText;
+            
+            // Reset state
+            currentHeartRate = 50;
+            dialogueTurnCount = 0;
+            dialogueHistory = [];
+            updateHeartRateUI(0);
+            
+            document.getElementById('chat-body').innerHTML = `
+                <div id="typing-loader" class="typing-loader">
+                    <div class="typing-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('progress-indicator').innerText = `대화 진행: 0 / ${maxTurns}`;
+            document.getElementById('thought-content').innerText = "과연 나에게 어떤 첫인상을 느꼈을까...?";
+
+            // Switch to game section
+            document.getElementById('setup-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'grid';
+
+            // Fetch partner's first hello
+            await fetchNextChat(true);
+        }
+
+        // Fetch Next Chat Reply from Server
+        async function fetchNextChat(isOpening = false, userMsg = '') {
+            const loader = document.getElementById('typing-loader');
+            loader.style.display = 'block';
+            loader.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userName,
+                        userGender,
+                        userMbti,
+                        partnerMbti,
+                        scenario: selectedScenarioText,
+                        history: dialogueHistory,
+                        currentMessage: userMsg,
+                        currentHeartRate
+                    })
+                });
+
+                if (!response.ok) throw new Error('서버 응답 오류');
+
+                const data = await response.json();
+
+                // Hide loader
+                loader.style.display = 'none';
+
+                // Add partner response to history and display
+                dialogueHistory.push({ sender: 'partner', text: data.reply });
+                appendMessage('partner', partnerMbti, data.reply);
+
+                // Update secret inner thoughts
+                document.getElementById('thought-content').innerText = data.innerThought || "비밀 속마음...";
+
+                // Update heart rate
+                if (!isOpening) {
+                    currentHeartRate = Math.min(100, Math.max(0, currentHeartRate + data.heartRateChange));
+                    updateHeartRateUI(data.heartRateChange);
+                    
+                    dialogueTurnCount++;
+                    document.getElementById('progress-indicator').innerText = `대화 진행: ${dialogueTurnCount} / ${maxTurns}`;
+
+                    // If reached 5 turns, trigger result report card
+                    if (dialogueTurnCount >= maxTurns) {
+                        setTimeout(finishDating, 2000);
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                loader.style.display = 'none';
+                alert('소개팅 상대와 통신 중 장애가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+            }
+        }
+
+        // Send User Chat Message
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            // Clear input
+            input.value = '';
+
+            // Add user message to history and display
+            dialogueHistory.push({ sender: 'user', text: msg });
+            appendMessage('user', '나', msg);
+
+            // Fetch partner reaction
+            await fetchNextChat(false, msg);
+        }
+
+        // Append message bubble to chat box
+        function appendMessage(sender, label, text) {
+            const chatBody = document.getElementById('chat-body');
+            const msgEl = document.createElement('div');
+            msgEl.className = `message ${sender}`;
+            msgEl.innerHTML = `
+                <span class="message-sender">${label}</span>
+                <div class="message-bubble">${text}</div>
+            `;
+            
+            // Insert before loader
+            const loader = document.getElementById('typing-loader');
+            chatBody.insertBefore(msgEl, loader);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Update Heart Rate Progress Bar and animation delta
+        function updateHeartRateUI(change) {
+            document.getElementById('heart-rate-val').innerText = `${currentHeartRate}%`;
+            document.getElementById('heart-rate-bar').style.width = `${currentHeartRate}%`;
+
+            // Display floating delta
+            const deltaEl = document.getElementById('delta-floating');
+            deltaEl.className = 'delta-floating'; // reset animations
+            
+            if (change > 0) {
+                deltaEl.innerText = `+${change}%`;
+                deltaEl.classList.add('show-positive');
+            } else if (change < 0) {
+                deltaEl.innerText = `${change}%`;
+                deltaEl.classList.add('show-negative');
+            }
+        }
+
+        // Finish Dating - transition to result card
+        async function finishDating() {
+            document.getElementById('game-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'flex';
+            
+            // Show loading placeholder
+            document.getElementById('result-badge').innerText = "결과 채점 중... 🔮";
+            document.getElementById('result-summary').innerText = "최고의 연애 전문가 코다리가 대화 내용을 정밀 분석하는 중입니다...";
+            document.getElementById('result-prediction').innerText = "두 분의 10년 뒤 운명을 시뮬레이션하고 있습니다...";
+
+            try {
+                const response = await fetch('/api/result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userName,
+                        userMbti,
+                        partnerMbti,
+                        scenario: selectedScenarioText,
+                        history: dialogueHistory,
+                        finalHeartRate: currentHeartRate
+                    })
+                });
+
+                if (!response.ok) throw new Error('성적표 생성 실패');
+
+                const data = await response.json();
+
+                // Display final results
+                document.getElementById('result-badge').innerText = data.status;
+                document.getElementById('result-summary').innerText = data.summary;
+                document.getElementById('result-prediction').innerText = data.futurePrediction;
+
+                // Animate circle graphs
+                animateCircle('stat-fill-sense', 'stat-val-sense', data.scoreSense);
+                animateCircle('stat-fill-flutter', 'stat-val-flutter', data.scoreFlutter);
+                animateCircle('stat-fill-frustrate', 'stat-val-frustrate', data.scoreFrustration);
+
+            } catch (error) {
+                console.error(error);
+                alert('소개팅 최종 결과 분석에 문제가 발생했습니다.');
+            }
+        }
+
+        // Animate circular progress wheels
+        function animateCircle(svgFillId, valTextId, targetVal) {
+            const fillEl = document.getElementById(svgFillId);
+            const textEl = document.getElementById(valTextId);
+            
+            const radius = 40;
+            const circumference = 2 * Math.PI * radius; // ~251.2
+            
+            // Set dashoffset based on value (0 to circumference)
+            const offset = circumference - (targetVal / 100) * circumference;
+            
+            fillEl.style.strokeDashoffset = offset;
+            
+            // Count up text
+            let current = 0;
+            const interval = setInterval(() => {
+                if (current >= targetVal) {
+                    textEl.innerText = `${targetVal}%`;
+                    clearInterval(interval);
+                } else {
+                    current++;
+                    textEl.innerText = `${current}%`;
+                }
+            }, 15);
+        }
+
+        // Go from landing to setup form
+        function goToSetup() {
+            document.getElementById('landing-section').style.display = 'none';
+            document.getElementById('setup-section').style.display = 'block';
+        }
+
+        // Reset to initial screen
+        function resetGame() {
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('setup-section').style.display = 'none';
+            document.getElementById('landing-section').style.display = 'flex';
+            
+            // Reset circles
+            document.getElementById('stat-fill-sense').style.strokeDashoffset = 251.2;
+            document.getElementById('stat-fill-flutter').style.strokeDashoffset = 251.2;
+            document.getElementById('stat-fill-frustrate').style.strokeDashoffset = 251.2;
+            document.getElementById('stat-val-sense').innerText = '0%';
+            document.getElementById('stat-val-flutter').innerText = '0%';
+            document.getElementById('stat-val-frustrate').innerText = '0%';
+        }
+    </script>
+</body>
+</html>
