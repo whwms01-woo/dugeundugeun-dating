@@ -1545,10 +1545,26 @@
                 font-size: 0.9rem !important;
                 flex-shrink: 0 !important;
             }
+            .message {
+                max-width: 85% !important;
+                width: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+                margin-bottom: 8px !important;
+            }
             .message-bubble {
-                word-break: break-word !important;
+                display: block !important;
+                width: auto !important;
+                max-width: 100% !important;
                 font-size: 0.88rem !important;
+                line-height: 1.45 !important;
                 padding: 10px 14px !important;
+                word-wrap: break-word !important;
+                word-break: break-all !important;
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                box-sizing: border-box !important;
             }
             .result-section {
                 padding: 20px 15px !important;
