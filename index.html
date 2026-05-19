@@ -319,16 +319,53 @@
             overflow: hidden; /* crop the avatar picture beautifully! */
         }
 
+        @keyframes gentleFloat {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-4px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
         .partner-avatar-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
-            transition: transform 0.5s ease;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: gentleFloat 4s ease-in-out infinite;
         }
 
         .partner-avatar-img:hover {
             transform: scale(1.1);
+        }
+
+        /* Avatar Emotion State Modifiers */
+        @keyframes bounceExcited {
+            0%, 100% { transform: scale(1.1) translateY(0); }
+            50% { transform: scale(1.1) translateY(-10px); }
+        }
+        .avatar-circle.state-happy {
+            border-color: #ff4b78 !important;
+            box-shadow: 0 0 35px rgba(255, 75, 120, 0.95) !important;
+            transform: scale(1.08);
+        }
+        .avatar-circle.state-happy .partner-avatar-img {
+            filter: brightness(1.1) contrast(1.05) drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+            animation: bounceExcited 0.6s ease-in-out infinite !important;
+        }
+
+        @keyframes shakeDisdain {
+            0%, 100% { transform: scale(0.95) translateX(0); }
+            20%, 60% { transform: scale(0.95) translateX(-6px); }
+            40%, 80% { transform: scale(0.95) translateX(6px); }
+        }
+        .avatar-circle.state-sad {
+            border-color: #5d6eff !important;
+            box-shadow: 0 0 35px rgba(93, 110, 255, 0.8) !important;
+            transform: scale(0.92);
+        }
+        .avatar-circle.state-sad .partner-avatar-img {
+            filter: grayscale(0.5) brightness(0.85) contrast(0.95);
+            animation: shakeDisdain 0.4s ease-in-out infinite !important;
         }
 
         .heartbeat-element {
@@ -1859,6 +1896,25 @@
             if (isSoundEnabled) {
                 startHeartbeatLoop();
             }
+
+            // Trigger Partner Avatar Emotion Animation & Floating Emoticons
+            const avatarCircle = document.getElementById('partner-avatar');
+            if (avatarCircle) {
+                avatarCircle.classList.remove('state-happy', 'state-sad');
+                if (change > 0) {
+                    avatarCircle.classList.add('state-happy');
+                    spawnAvatarEmojis('💖', 3);
+                    setTimeout(() => {
+                        avatarCircle.classList.remove('state-happy');
+                    }, 3500);
+                } else if (change < 0) {
+                    avatarCircle.classList.add('state-sad');
+                    spawnAvatarEmojis('💦', 3);
+                    setTimeout(() => {
+                        avatarCircle.classList.remove('state-sad');
+                    }, 3500);
+                }
+            }
         }
 
         // Finish Dating - transition to result card
@@ -2289,6 +2345,38 @@
             }
             if (confirm('여기서 대화를 중단하고 지금까지 나눈 썸싱 대화만을 기반으로 "중간 정산 성적표"를 받으시겠어요? 🚪💕')) {
                 finishDating(true);
+            }
+        }
+
+        // Spawn floating emoticons dynamically above partner avatar
+        function spawnAvatarEmojis(emoji, count = 3) {
+            const container = document.querySelector('.profile-avatar-container');
+            if (!container) return;
+            
+            for (let i = 0; i < count; i++) {
+                const bubble = document.createElement('div');
+                bubble.innerText = emoji;
+                bubble.style.position = 'absolute';
+                bubble.style.left = `${35 + Math.random() * 50}px`; // random horizontally over avatar
+                bubble.style.top = `${20 + Math.random() * 40}px`;
+                bubble.style.fontSize = '28px';
+                bubble.style.pointerEvents = 'none';
+                bubble.style.zIndex = '15';
+                bubble.style.transition = 'all 1.3s cubic-bezier(0.1, 0.8, 0.25, 1)';
+                bubble.style.opacity = '1';
+                bubble.style.filter = 'drop-shadow(0 0 5px rgba(255, 255, 255, 0.5))';
+                
+                container.appendChild(bubble);
+                
+                // Animate upwards, rotate, and fade out
+                setTimeout(() => {
+                    bubble.style.transform = `translate(${(Math.random() - 0.5) * 60}px, -70px) scale(1.4) rotate(${(Math.random() - 0.5) * 45}deg)`;
+                    bubble.style.opacity = '0';
+                }, 15);
+                
+                setTimeout(() => {
+                    bubble.remove();
+                }, 1400);
             }
         }
     </script>
