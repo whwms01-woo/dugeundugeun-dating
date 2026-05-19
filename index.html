@@ -376,6 +376,23 @@
             animation: shakeDisdain 0.4s ease-in-out infinite !important;
         }
 
+        /* Dynamic Excitement Level Filters (Idea 4) */
+        .avatar-circle.blush-filter {
+            border-color: #ff3366 !important;
+            box-shadow: 0 0 35px rgba(255, 51, 102, 0.8), inset 0 0 20px rgba(255, 105, 180, 0.5) !important;
+        }
+        .avatar-circle.blush-filter .partner-avatar-img {
+            filter: sepia(0.12) saturate(1.45) brightness(1.1) hue-rotate(-10deg) drop-shadow(0 0 8px rgba(255, 51, 102, 0.4)) !important;
+        }
+        
+        .avatar-circle.chill-filter {
+            border-color: #3b5998 !important;
+            box-shadow: 0 0 30px rgba(59, 89, 152, 0.6), inset 0 0 20px rgba(0, 191, 255, 0.3) !important;
+        }
+        .avatar-circle.chill-filter .partner-avatar-img {
+            filter: grayscale(0.55) sepia(0.08) saturate(0.65) brightness(0.85) hue-rotate(15deg) !important;
+        }
+
         .heartbeat-element {
             position: absolute;
             top: -5px;
@@ -2755,14 +2772,16 @@
                 deltaEl.classList.add('show-negative');
             }
 
-            // Dynamically adjust ASMR heartbeat rate tempo
+            // Dynamically adjust ASMR heartbeat rate tempo and BGM progression (Idea 2)
             if (isSoundEnabled) {
                 startHeartbeatLoop();
+                startBgmEngine(); // update chord progression and tempo instantly
             }
 
             // Trigger Partner Avatar Emotion Animation & Floating Emoticons
             const avatarCircle = document.getElementById('partner-avatar');
             if (avatarCircle) {
+                // Apply temporary animation state
                 avatarCircle.classList.remove('state-happy', 'state-sad');
                 if (change > 0) {
                     avatarCircle.classList.add('state-happy');
@@ -2776,6 +2795,14 @@
                     setTimeout(() => {
                         avatarCircle.classList.remove('state-sad');
                     }, 3500);
+                }
+
+                // Apply dynamic persistent excitement level filters (Idea 4)
+                avatarCircle.classList.remove('blush-filter', 'chill-filter');
+                if (currentHeartRate >= 80) {
+                    avatarCircle.classList.add('blush-filter');
+                } else if (currentHeartRate <= 30) {
+                    avatarCircle.classList.add('chill-filter');
                 }
             }
         }
@@ -2899,6 +2926,9 @@
             dialogueTurnCount = 0;
             dialogueHistory = [];
             currentHeartRate = 50;
+            
+            // Stop ambient music engine (Idea 2)
+            stopBgmEngine();
         }
 
         // 3D Starry Heart Falling Engine
@@ -3057,6 +3087,99 @@
             }, intervalMs);
         }
 
+        // ==========================================
+        // 🔮 PREMIUM PROCEDURAL BGM ENGINE (Idea 2)
+        // ==========================================
+        let bgmInterval = null;
+        let bgmStep = 0;
+        
+        function startBgmEngine() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+            }
+            
+            // Bright major-key notes (Happy/Excited: Cmaj7 / Dm7 arpeggios)
+            const happyChords = [
+                [523.25, 659.25, 783.99, 987.77], // C5, E5, G5, B5 (Cmaj7)
+                [587.33, 698.46, 880.00, 1046.50] // D5, F5, A5, C6 (Dm7)
+            ];
+            
+            // Cozy Lydian romantic notes (Neutral range: Fmaj6 / G6 arpeggios)
+            const neutralChords = [
+                [349.23, 440.00, 523.25, 587.33], // F4, A4, C5, D5 (Fmaj6)
+                [392.00, 493.88, 587.33, 659.25]  // G4, B4, D5, E5 (G6)
+            ];
+            
+            // Cold and lonely minor-key notes (Chill range: Am7 / G7 arpeggios)
+            const sadChords = [
+                [220.00, 261.63, 329.63, 392.00], // A3, C4, E4, G4 (Am7)
+                [196.00, 246.94, 293.66, 349.23]  // G3, B3, D4, F4 (G7)
+            ];
+            
+            // Calculate tempo (note speed) based on excitement level
+            let intervalMs = 1500;
+            if (currentHeartRate >= 80) {
+                intervalMs = 800; // Exciting / Fast pace
+            } else if (currentHeartRate <= 30) {
+                intervalMs = 2400; // Depressed / Very slow pace
+            }
+            
+            bgmInterval = setInterval(() => {
+                if (!isSoundEnabled) return;
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                let chordPool = neutralChords;
+                let oscType = 'sine';
+                let gainVal = 0.022; // very soft background pad
+                let duration = 1.3;
+                
+                if (currentHeartRate >= 80) {
+                    chordPool = happyChords;
+                    oscType = 'sine';
+                    gainVal = 0.028; 
+                    duration = 0.75;
+                } else if (currentHeartRate <= 30) {
+                    chordPool = sadChords;
+                    oscType = 'triangle'; // warm low-pass feeling
+                    gainVal = 0.016; 
+                    duration = 2.2;
+                }
+                
+                const now = audioCtx.currentTime;
+                const currentChord = chordPool[Math.floor(bgmStep / 4) % chordPool.length];
+                const noteFreq = currentChord[bgmStep % currentChord.length];
+                
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                osc.type = oscType;
+                osc.frequency.setValueAtTime(noteFreq, now);
+                
+                // Synthesize smooth attack/release envelope
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(gainVal, now + 0.15); // soft fade-in swell
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+                
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + duration + 0.1);
+                
+                bgmStep++;
+            }, intervalMs);
+        }
+        
+        function stopBgmEngine() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
         // Toggle Audio Controls
         function toggleSound() {
             isSoundEnabled = !isSoundEnabled;
@@ -3067,6 +3190,7 @@
                 btn.innerHTML = '<span class="sound-btn-icon">🔊</span>';
                 btn.classList.add('active');
                 startHeartbeatLoop();
+                startBgmEngine(); // Start procedurally generated background music (Idea 2)
                 
                 // Play dynamic trigger sound
                 setTimeout(() => {
@@ -3078,6 +3202,7 @@
                 if (heartbeatInterval) {
                     clearInterval(heartbeatInterval);
                 }
+                stopBgmEngine(); // Stop procedurally generated background music (Idea 2)
             }
         }
 
