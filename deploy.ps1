@@ -9,7 +9,7 @@ Write-Host "[Step 1] Packing code files (git add .)..." -ForegroundColor Yellow
 git add .
 
 # 2. Git Commit
-$commitMsg = "fix: resolve page reset layout stretch and profile modal tags alignment bugs"
+$commitMsg = "fix: optimize mobile UI header and implement interactive inner-mind overlay modal"
 Write-Host "[Step 2] Creating git commit..." -ForegroundColor Yellow
 git commit -m $commitMsg
 

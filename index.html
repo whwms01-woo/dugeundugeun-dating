@@ -1520,32 +1520,33 @@
                 display: flex !important;
                 flex-direction: row !important;
                 align-items: center !important;
+                justify-content: center !important;
                 gap: 8px !important;
-                padding: 6px 12px !important;
-                border-radius: 10px !important;
-                border: 1px solid rgba(209, 186, 255, 0.15) !important;
-                background: rgba(15, 10, 30, 0.4) !important;
-                margin-top: 4px !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+                padding: 8px 16px !important;
+                border-radius: 20px !important;
+                border: 1px solid rgba(144, 97, 255, 0.4) !important;
+                background: rgba(144, 97, 255, 0.15) !important;
+                margin-top: 8px !important;
+                width: auto !important;
+                max-width: fit-content !important;
+                align-self: center !important;
+                cursor: pointer !important;
+                box-shadow: 0 4px 15px rgba(144, 97, 255, 0.2) !important;
+                transition: transform 0.2s !important;
+            }
+            .thought-bubble-container:active {
+                transform: scale(0.95) !important;
             }
             .thought-title {
-                font-size: 0.65rem !important;
-                white-space: nowrap !important;
+                font-size: 0.75rem !important;
+                font-weight: 700 !important;
+                color: #c19eff !important;
+                background: transparent !important;
+                padding: 0 !important;
                 margin: 0 !important;
-                padding: 2px 5px !important;
-                background: rgba(209, 186, 255, 0.15) !important;
-                border-radius: 4px !important;
             }
             .thought-content {
-                font-size: 0.7rem !important;
-                white-space: normal !important;
-                word-break: break-all !important;
-                line-height: 1.35 !important;
-                overflow: visible !important;
-                text-overflow: clip !important;
-                text-align: left !important;
-                margin: 0 !important;
+                display: none !important; /* Hide original mind text on mobile so only pop-up triggers */
             }
             .chat-panel {
                 height: 520px !important;
@@ -1555,8 +1556,11 @@
                 padding: 10px 14px !important;
                 flex-direction: row !important;
                 align-items: center !important;
-                justify-content: space-between !important;
-                gap: 6px !important;
+                justify-content: center !important;
+                gap: 0px !important;
+            }
+            .chat-header-title {
+                display: none !important; /* Hide "소개팅 진행 중" text on mobile */
             }
             .early-exit-bar {
                 flex-direction: row !important;
@@ -1578,9 +1582,14 @@
             .scenario-badge {
                 white-space: normal !important;
                 word-break: break-all !important;
-                font-size: 0.75rem !important;
-                display: inline-flex !important;
-                max-width: 100% !important;
+                font-size: 0.8rem !important;
+                padding: 6px 14px !important;
+                border-radius: 12px !important;
+                background: rgba(144, 97, 255, 0.15) !important;
+                border: 1px solid rgba(144, 97, 255, 0.3) !important;
+                display: block !important;
+                text-align: center !important;
+                width: 100% !important;
             }
             .chat-body {
                 padding: 15px !important;
@@ -1838,6 +1847,104 @@
             font-weight: 700;
         }
 
+        /* PREMIUM REAL MIND MODAL STYLE */
+        .real-mind-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(7, 4, 18, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .real-mind-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .real-mind-modal-content {
+            background: linear-gradient(135deg, rgba(28, 16, 57, 0.95), rgba(18, 11, 41, 0.98));
+            border: 1px solid rgba(144, 97, 255, 0.3);
+            border-radius: 24px;
+            padding: 30px 24px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(144, 97, 255, 0.2);
+            position: relative;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .real-mind-modal.show .real-mind-modal-content {
+            transform: scale(1);
+        }
+        .real-mind-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .real-mind-modal-close:hover {
+            background: rgba(255, 75, 120, 0.2);
+            color: #ff4b78;
+        }
+        .real-mind-modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            margin: 0;
+        }
+        .real-mind-modal-text {
+            font-size: 0.95rem;
+            color: #dfd5f5;
+            line-height: 1.6;
+            background: rgba(144, 97, 255, 0.08);
+            border: 1px solid rgba(144, 97, 255, 0.15);
+            border-radius: 16px;
+            padding: 20px 16px;
+            width: 100%;
+            box-sizing: border-box;
+            word-break: keep-all;
+            font-weight: 500;
+        }
+        .real-mind-modal-btn {
+            background: linear-gradient(90deg, #9061ff, #ff4b78);
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-size: 0.9rem;
+        }
+        .real-mind-modal-btn:hover {
+            opacity: 0.9;
+        }
+
         /* 3D FLOATING HEARTS BACKGROUND EFFECT */
         .hearts-container {
             position: fixed;
@@ -2046,7 +2153,7 @@
                         </div>
                     </div>
 
-                    <div class="thought-bubble-container">
+                    <div class="thought-bubble-container" onclick="openRealMindModal()" style="cursor: pointer;" title="클릭하여 상대방의 속마음 자세히 보기">
                         <div class="thought-title">🔍 상대방의 리얼 속마음</div>
                         <div id="thought-content" class="thought-content">과연 나에게 어떤 첫인상을 느꼈을까...?</div>
                     </div>
@@ -2055,8 +2162,8 @@
                 <!-- Right chat panel -->
                 <div class="chat-panel">
                     <div class="chat-header">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="font-weight: 700;">소개팅 진행 중</div>
+                        <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                            <div class="chat-header-title" style="font-weight: 700;">소개팅 진행 중</div>
                             <div id="scenario-badge" class="scenario-badge">☕ 감성 카페</div>
                         </div>
                     </div>
@@ -2163,6 +2270,20 @@
                 <div id="profile-modal-details" class="profile-modal-details-container"></div>
                 <p id="profile-modal-desc" class="profile-modal-desc">"생각이 참 많은 편이에요..."</p>
             </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM REAL MIND OVERLAY MODAL FOR MOBILE -->
+    <div id="real-mind-modal" class="real-mind-modal" onclick="closeRealMindModal()">
+        <div class="real-mind-modal-content" onclick="event.stopPropagation()">
+            <button class="real-mind-modal-close" onclick="closeRealMindModal()">✕</button>
+            <div class="real-mind-modal-header">
+                <h3>🔍 상대방의 리얼 속마음</h3>
+            </div>
+            <div id="real-mind-modal-text" class="real-mind-modal-text">
+                "상대방이 생각하는 속마음이 여기에 예쁘게 표시됩니다..."
+            </div>
+            <button class="real-mind-modal-btn" onclick="closeRealMindModal()">대화로 돌아가기</button>
         </div>
     </div>
 
@@ -2329,7 +2450,16 @@
                 ? `/assets/partner_female_${imageIndex}.png` 
                 : `/assets/partner_male_${imageIndex}.png`;
                 
-            document.getElementById('partner-avatar').innerHTML = `<img src="${partnerImgSrc}" alt="${partnerMbti}" class="partner-avatar-img">`;
+            // DiceBear dynamic premium anime-style avatar fallback based on seed (partnerName)
+            const style = 'lorelei'; // beautiful anime/otome webtoon style!
+            const fallbackUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(partnerName)}&radius=50&backgroundColor=181135`;
+                
+            document.getElementById('partner-avatar').innerHTML = `
+                <img src="${partnerImgSrc}" 
+                     alt="${partnerMbti}" 
+                     class="partner-avatar-img" 
+                     onerror="this.onerror=null; this.src='${fallbackUrl}';">
+            `;
             document.getElementById('partner-name-display').innerText = partnerName;
             document.getElementById('partner-profile-details').innerText = `${partnerAge}세 · ${partnerJob} · ${partnerHobbies}`;
             document.getElementById('partner-mbti-badge').innerText = partnerMbti;
@@ -2830,6 +2960,29 @@
 
         function closeProfileModal() {
             const modal = document.getElementById('profile-image-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Interactive mobile real mind popup functions
+        function openRealMindModal() {
+            const content = document.getElementById('thought-content').innerText;
+            document.getElementById('real-mind-modal-text').innerText = content;
+            const modal = document.getElementById('real-mind-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 15);
+            
+            if (isSoundEnabled) {
+                playChimeSound();
+            }
+        }
+
+        function closeRealMindModal() {
+            const modal = document.getElementById('real-mind-modal');
             modal.classList.remove('show');
             setTimeout(() => {
                 modal.style.display = 'none';
