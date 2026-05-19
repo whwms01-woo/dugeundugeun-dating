@@ -879,18 +879,13 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 6px 14px;
-            border-radius: 20px;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.25);
             font-weight: 700;
             pointer-events: none;
             letter-spacing: 0.5px;
             z-index: 100;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
         }
 
         /* Cover Art Container */
@@ -1059,6 +1054,84 @@
             .ambient-glow {
                 width: 250px;
                 height: 250px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 15px 10px 5px;
+            }
+            header h1 {
+                font-size: 1.8rem;
+            }
+            main {
+                padding: 0 10px 20px;
+            }
+            .container {
+                border-radius: 16px;
+            }
+            .landing-section {
+                padding: 20px 15px;
+            }
+            .dating-cover-landing {
+                margin-bottom: 20px;
+                border-radius: 12px;
+                max-width: 100%;
+            }
+            .landing-start-btn {
+                padding: 12px 30px;
+                font-size: 1.1rem;
+            }
+            .setup-section {
+                padding: 20px 15px;
+            }
+            .section-title {
+                font-size: 1.25rem;
+                margin-bottom: 20px;
+            }
+            .setup-grid {
+                gap: 15px;
+            }
+            .input-group label {
+                font-size: 0.85rem;
+                margin-bottom: 6px;
+            }
+            .input-control {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+            .scenario-card {
+                padding: 12px;
+            }
+            .start-btn {
+                padding: 14px;
+                font-size: 1rem;
+            }
+            .profile-panel {
+                padding: 20px 15px;
+            }
+            .avatar-circle {
+                width: 100px;
+                height: 100px;
+            }
+            .chat-panel {
+                height: 380px;
+            }
+            .chat-bubble {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                max-width: 85%;
+            }
+            .chat-input-area {
+                padding: 10px;
+            }
+            .chat-input {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+            .send-btn {
+                padding: 10px 18px;
+                font-size: 0.9rem;
             }
         }
     </style>
