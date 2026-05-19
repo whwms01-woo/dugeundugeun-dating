@@ -1593,15 +1593,28 @@
 
             // Determine dynamic anime character portrait based on gender and MBTI group
             const partnerGender = (userGender === '남성') ? '여성' : (userGender === '여성' ? '남성' : '여성');
-            const emotionalMbtis = ['ENFP', 'INFJ', 'INFP', 'ENFJ', 'ESTP', 'ESFP', 'ISFP', 'ISTP'];
-            const isEmotional = emotionalMbtis.includes(partnerMbti);
             
-            let partnerImgSrc = '';
-            if (partnerGender === '여성') {
-                partnerImgSrc = isEmotional ? '/assets/partner_female_nf.png' : '/assets/partner_female_nt.png';
-            } else {
-                partnerImgSrc = isEmotional ? '/assets/partner_male_nf.png' : '/assets/partner_male_nt.png';
+            // Map 16 MBTIs to 4 major temperament groups for unique illustrations
+            const nfMbtis = ['ENFP', 'INFJ', 'INFP', 'ENFJ'];
+            const ntMbtis = ['INTJ', 'ENTP', 'ENTJ', 'INTP'];
+            const spMbtis = ['ESTP', 'ESFP', 'ISFP', 'ISTP'];
+            const sjMbtis = ['ISFJ', 'ISTJ', 'ESFJ', 'ESTJ'];
+            
+            let mbtiGroup = 'nf';
+            if (nfMbtis.includes(partnerMbti)) {
+                mbtiGroup = 'nf';
+            } else if (ntMbtis.includes(partnerMbti)) {
+                mbtiGroup = 'nt';
+            } else if (spMbtis.includes(partnerMbti)) {
+                mbtiGroup = 'sp';
+            } else if (sjMbtis.includes(partnerMbti)) {
+                mbtiGroup = 'sj';
             }
+            
+            const partnerImgSrc = (partnerGender === '여성') 
+                ? `/assets/partner_female_${mbtiGroup}.png` 
+                : `/assets/partner_male_${mbtiGroup}.png`;
+                
             document.getElementById('partner-avatar').innerHTML = `<img src="${partnerImgSrc}" alt="${partnerMbti}" class="partner-avatar-img">`;
             document.getElementById('partner-mbti-badge').innerText = partnerMbti;
             document.getElementById('partner-desc').innerText = descMap[partnerMbti] || '소개팅 상대방';
