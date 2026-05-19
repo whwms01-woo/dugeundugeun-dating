@@ -1145,6 +1145,45 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* 3D FLOATING HEARTS BACKGROUND EFFECT */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-heart {
+            position: absolute;
+            top: -50px;
+            font-size: 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform, opacity;
+            animation: fallAndFlutter 10s linear forwards;
+        }
+
+        @keyframes fallAndFlutter {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.65;
+            }
+            90% {
+                opacity: 0.65;
+            }
+            100% {
+                transform: translateY(105vh) translateX(120px) rotate(360deg) scale(1.1);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1704,6 +1743,44 @@
             document.getElementById('stat-val-flutter').innerText = '0%';
             document.getElementById('stat-val-frustrate').innerText = '0%';
         }
+
+        // 3D Starry Heart Falling Engine
+        function initHeartsBackground() {
+            const container = document.createElement('div');
+            container.className = 'hearts-container';
+            document.body.appendChild(container);
+
+            const heartEmojis = ['💖', '❤️', '💕', '✨', '💝'];
+            const colors = ['#ff4b78', '#ff7675', '#fd79a8', '#c15eff', '#00f2fe'];
+
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                
+                const randomEmoji = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                const randomLeft = Math.random() * 100;
+                const randomSize = 12 + Math.random() * 20; 
+                const randomDuration = 6 + Math.random() * 8; 
+                const randomDelay = Math.random() * 2; 
+
+                heart.innerText = randomEmoji;
+                heart.style.left = `${randomLeft}%`;
+                heart.style.fontSize = `${randomSize}px`;
+                heart.style.color = randomColor;
+                heart.style.animationDuration = `${randomDuration}s`;
+                heart.style.animationDelay = `${randomDelay}s`;
+                heart.style.filter = `drop-shadow(0 0 ${randomSize / 3.5}px ${randomColor}b3)`;
+
+                container.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, (randomDuration + randomDelay) * 1000);
+            }, 750); 
+        }
+
+        window.addEventListener('DOMContentLoaded', initHeartsBackground);
     </script>
 </body>
 </html>
