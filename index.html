@@ -1406,7 +1406,7 @@
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-                max-width: 170px !important;
+                max-width: 100px !important;
             }
             .profile-mbti-badge, .profile-desc {
                 display: none !important;
@@ -1485,9 +1485,11 @@
             }
             .thought-content {
                 font-size: 0.7rem !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+                white-space: normal !important;
+                word-break: break-all !important;
+                line-height: 1.35 !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
                 text-align: left !important;
                 margin: 0 !important;
             }
