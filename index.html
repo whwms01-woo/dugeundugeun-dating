@@ -1000,18 +1000,21 @@
             z-index: 10;
         }
 
-        /* WATERMARK */
+        /* PREMIUM FLOATING WATERMARK */
         .watermark {
-            position: absolute;
-            bottom: 20px;
-            right: 24px;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.45);
-            z-index: 1000;
-            pointer-events: none;
-            letter-spacing: 1px;
-            font-weight: 300;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            position: fixed !important;
+            bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+            right: max(20px, env(safe-area-inset-right, 20px)) !important;
+            font-size: 0.8rem !important;
+            color: rgba(255, 255, 255, 0.35) !important;
+            z-index: 999999 !important;
+            pointer-events: none !important;
+            letter-spacing: 1px !important;
+            font-weight: 300 !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         /* Cover Art Container */
