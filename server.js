@@ -56,6 +56,56 @@ for (const [destName, srcPath] of Object.entries(sourceImages)) {
     }
 }
 
+// Dynamic 10 Male & 10 Female Illustration setup
+const femaleTemplates = [
+    'partner_female_nf.png',
+    'partner_female_nt.png',
+    'partner_female_sp.png',
+    'partner_female_sj.png',
+    'partner_female_nf_e.png',
+    'partner_female_nt_e.png'
+];
+
+const maleTemplates = [
+    'partner_male_nf.png',
+    'partner_male_nt.png',
+    'partner_male_sp.png',
+    'partner_male_sj.png',
+    'partner_male_nf_e.png',
+    'partner_male_nt_e.png',
+    'partner_male_kodari.png'
+];
+
+for (let i = 1; i <= 10; i++) {
+    const fDest = path.join(assetsDir, `partner_female_${i}.png`);
+    if (!fs.existsSync(fDest)) {
+        const template = femaleTemplates[(i - 1) % femaleTemplates.length];
+        const src = path.join(assetsDir, template);
+        if (fs.existsSync(src)) {
+            try {
+                fs.copyFileSync(src, fDest);
+                console.log(`[Asset Setup] Successfully created female character ${i} locally!`);
+            } catch (e) {
+                console.error(`[Asset Setup] Failed to create female character ${i}:`, e);
+            }
+        }
+    }
+    
+    const mDest = path.join(assetsDir, `partner_male_${i}.png`);
+    if (!fs.existsSync(mDest)) {
+        const template = maleTemplates[(i - 1) % maleTemplates.length];
+        const src = path.join(assetsDir, template);
+        if (fs.existsSync(src)) {
+            try {
+                fs.copyFileSync(src, mDest);
+                console.log(`[Asset Setup] Successfully created male character ${i} locally!`);
+            } catch (e) {
+                console.error(`[Asset Setup] Failed to create male character ${i}:`, e);
+            }
+        }
+    }
+}
+
 // 에셋 통합 서빙 라우트 (클라우드/로컬 가변 호환 하이브리드 서빙)
 app.get('/assets/:filename', (req, res) => {
     const filename = req.params.filename;
@@ -125,19 +175,6 @@ app.post('/api/chat', async (req, res) => {
         });
 
         let prompt = "";
-        
-        let kodariSpecialPrompt = "";
-        if (partnerMbti === 'ESTJ_KODARI') {
-            kodariSpecialPrompt = `
-            ★ [특별 규칙 - 코다리 부장 빙의 모드] ★
-            너는 소개팅 상대방이 아니라, 사실 유저의 친근하면서도 호탕한 츤데레 직장 상사인 '코다리 부장'이야.
-            소개팅 시나리오 상황을 바탕으로 면담이나 미팅을 하는 척하면서, 유저를 '경석이' 혹은 '경석 대리/주임'이라고 다정하고 우렁차게 불러줘.
-            - 말투 어조: '어이, 경석이! 껄껄껄!', '라떼는 말이야...', '믹스커피 한잔 타와봐', '역시 내 에이스구만!'
-            - 유저의 답변에 대해 소개팅인 척하면서도 부장님 특유의 능글맞은 사내 멘토링과 꼰대 잔소리를 섞어 2~3문장으로 재미있게 답변해줘.
-            - 호감도 변동량(heartRateChange)은 유저가 회사 충성심이나 아부, 싹싹한 대답을 하면 상승(+10 ~ +15), 뺀질거리거나 퇴사 드립을 치면 대폭 하락(-10 ~ -15)하게 설계해줘.
-            - 속마음(innerThought)은 '우리 경석이 연봉 올려줘야겠구만' 혹은 '이 자식 요새 딴생각 하는구만 쯧쯧' 같은 부장님의 귀여운 진심 한 줄을 적어줘.
-            `;
-        }
 
         if (!history || history.length === 0) {
             // 첫 번째 매칭 시작 시 파트너의 오프닝 대사 요청
@@ -155,7 +192,6 @@ app.post('/api/chat', async (req, res) => {
             - 소개팅 장소/시나리오: ${scenario}
             
             [작성 조건]
-            ${kodariSpecialPrompt}
             1. 첫 만남에서 '${partnerMbti}' 성격에 100% 빙의하여 어울리는 첫인사(오프닝 대사)를 건네줘.
             2. 내 프로필(이름, 나이, 직업, 취미 등)의 설정 정보를 완벽히 인지하고 대화 속에 어울리게 녹여낼 수 있도록 해줘. 첫 대사에서 억지로 다 말할 필요는 없고, 자연스럽게 첫인사를 나눠줘.
             3. MBTI 특성을 극대화하여 표현해줘. (예: ENFP는 하이텐션과 이모지 남발, INTJ는 차분하고 예의 바르지만 다소 건조한 말투, ESTP는 직진 플러팅 등)
@@ -194,7 +230,6 @@ app.post('/api/chat', async (req, res) => {
             유저: "${currentMessage}"
             
             [작성 조건]
-            ${kodariSpecialPrompt}
             1. 유저의 최신 말에 대해 '${partnerMbti}' 성격 특성을 200% 살려서 자연스럽게 답변(reply)해줘. 2~3문장 이내로 톡 쏘거나, 수줍어하거나, 티키타카가 되게 작성해줘.
             2. 만약 유저가 나이나 직업, 취미, 이름 등에 대해 질문하거나 언급했다면, 위의 [내 프로필 정보]에 적힌 값(이름: ${partnerName}, 나이: ${partnerAge}세, 직업: ${partnerJob}, 취미: ${partnerHobbies})을 기반으로 대화하듯 매우 생생하고 자연스럽게 답해줘.
             3. 유저가 방금 한 말이 내 성격('${partnerMbti}') 입장에서 마음에 드는지 판단하여 호감도 변동량(heartRateChange)을 -15에서 +15 사이의 정수로 정해줘. 
