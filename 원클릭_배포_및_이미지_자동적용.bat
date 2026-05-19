@@ -109,7 +109,7 @@ git add .
 
 echo.
 echo [Step 3] 로컬 배포 커밋 생성 중 (git commit)...
-git commit -m "feat: implement realistic 0% heart rate rage-quit system and reciprocal persona interaction"
+git commit -m "feat: implement 10-second dramatic countdown timer and emergency slide-down banner for heart rate 0% exit"
 
 echo.
 echo [Step 4] 실서버 라이브 전송 중 (git push origin main)...

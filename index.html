@@ -1995,6 +1995,28 @@
             }
         }
         
+        /* EMERGENCY RAGE QUIT BANNER */
+        .rage-quit-banner {
+            background: linear-gradient(90deg, rgba(255, 75, 120, 0.95), rgba(18, 10, 36, 0.98)) !important;
+            border-bottom: 2px solid #ff4b78 !important;
+            color: #fff !important;
+            padding: 10px 16px !important;
+            font-size: 0.82rem !important;
+            font-weight: 800 !important;
+            text-align: center !important;
+            letter-spacing: 0.5px !important;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px #ff4b78 !important;
+            box-shadow: 0 4px 15px rgba(255, 75, 120, 0.4) !important;
+            animation: slideDownBanner 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+            z-index: 99 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        @keyframes slideDownBanner {
+            0% { transform: translateY(-100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
         @keyframes cameraShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             10% { transform: translate(-5px, -3px) rotate(-1deg); }
@@ -2190,6 +2212,11 @@
                             <div class="chat-header-title" style="font-weight: 700;">소개팅 진행 중</div>
                             <div id="scenario-badge" class="scenario-badge">☕ 감성 카페</div>
                         </div>
+                    </div>
+                    
+                    <!-- EMERGENCY RAGE QUIT BANNER (Hidden by default) -->
+                    <div id="rage-quit-banner" class="rage-quit-banner" style="display: none;">
+                        <span>🚨 EMERGENCY: 상대방이 정색하고 자리를 박차고 나갔습니다!</span>
                     </div>
                     
                     <!-- Dedicated intermediate early exit bar -->
@@ -2577,14 +2604,24 @@
                         // 1. Lock the chat input to block further messages
                         const chatInputEl = document.getElementById('chat-input');
                         chatInputEl.disabled = true;
-                        chatInputEl.placeholder = "상대방이 정색하고 자리를 박차고 나갔습니다...";
                         const sendBtnEl = document.querySelector('.send-btn');
                         if (sendBtnEl) sendBtnEl.disabled = true;
-
+ 
                         // 2. Play critical failure sound
                         playFailSound();
-
-                        // 3. Append last dramatic angry exit warning bubble
+ 
+                        // 3. Show emergency slide-down banner above chat box
+                        const banner = document.getElementById('rage-quit-banner');
+                        if (banner) {
+                            banner.style.display = 'block';
+                        }
+                        // Hide early-exit bar to make visual room
+                        const exitBar = document.querySelector('.early-exit-bar');
+                        if (exitBar) {
+                            exitBar.style.display = 'none';
+                        }
+ 
+                        // 4. Append last dramatic angry exit warning bubble
                         setTimeout(() => {
                             let angryReply = `"(정색하며 가방을 챙겨 벌떡 일어나며) 더는 못 참겠네요. 진짜 매너가 기본도 안 되어 있으시군요. 죄송한데 저 먼저 일어날게요. 다시는 연락하지 마세요!"`;
                             if (partnerMbti === 'INFJ' || partnerMbti === 'INFP') {
@@ -2606,16 +2643,33 @@
                                 document.body.style.border = 'none';
                             }, 800);
                         }, 800);
-
-                        // 4. Force intermediate report card generation after 4.5 seconds
+ 
+                        // 5. 10 Seconds Countdown Timer inside Chat Input Box placeholder
+                        let secondsLeft = 10;
+                        chatInputEl.placeholder = `대화창 강제 종료 ${secondsLeft}초 전... ⏳`;
+ 
+                        const countdownInterval = setInterval(() => {
+                            secondsLeft--;
+                            if (secondsLeft > 0) {
+                                chatInputEl.placeholder = `대화창 강제 종료 ${secondsLeft}초 전... ⏳`;
+                                playPopSound(); // Suspenseful ticking tone
+                            } else {
+                                chatInputEl.placeholder = `조기 정산 중... 🔮`;
+                                clearInterval(countdownInterval);
+                            }
+                        }, 1000);
+ 
+                        // 6. Force intermediate report card generation after exactly 10.5 seconds
                         setTimeout(() => {
                             chatInputEl.disabled = false;
                             chatInputEl.placeholder = "대화를 입력해주세요...";
                             if (sendBtnEl) sendBtnEl.disabled = false;
+                            if (banner) banner.style.display = 'none';
+                            if (exitBar) exitBar.style.display = 'flex';
                             
                             finishDating(true); // isEarly = true
-                        }, 4500);
-
+                        }, 10500);
+ 
                         return;
                     }
 
