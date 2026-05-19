@@ -572,6 +572,26 @@
             justify-content: space-between;
         }
 
+        .early-exit-bar {
+            background: rgba(255, 75, 120, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 8px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .exit-bar-text {
+            font-size: 0.78rem;
+            color: #d1baff;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .stop-date-btn {
             background: rgba(255, 75, 120, 0.12);
             border: 1px solid rgba(255, 75, 120, 0.3);
@@ -1338,9 +1358,26 @@
             }
             .chat-header {
                 padding: 12px 15px !important;
-                flex-direction: column !important;
-                align-items: flex-start !important;
+                flex-direction: row !important;
+                align-items: center !important;
                 gap: 6px !important;
+            }
+            .early-exit-bar {
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 8px !important;
+                padding: 8px 12px !important;
+                text-align: center !important;
+            }
+            .exit-bar-text {
+                font-size: 0.72rem !important;
+            }
+            .early-exit-bar .stop-date-btn {
+                width: 100% !important;
+                max-width: 180px !important;
+                justify-content: center !important;
+                font-size: 0.7rem !important;
+                padding: 5px 10px !important;
             }
             .scenario-badge {
                 white-space: normal !important;
@@ -1641,6 +1678,11 @@
                             <div style="font-weight: 700;">소개팅 진행 중</div>
                             <div id="scenario-badge" class="scenario-badge">☕ 감성 카페</div>
                         </div>
+                    </div>
+                    
+                    <!-- Dedicated intermediate early exit bar -->
+                    <div class="early-exit-bar">
+                        <span class="exit-bar-text">💡 대화 도중 언제든 중간 정산 성적표를 받고 탈출할 수 있습니다.</span>
                         <button class="stop-date-btn" onclick="stopDateEarly()">
                             🚪 데이트 종료 (중간 정산)
                         </button>
