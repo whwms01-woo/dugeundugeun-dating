@@ -1223,11 +1223,24 @@
                 height: 250px !important;
             }
             .watermark {
-                display: none !important;
+                position: relative !important;
+                bottom: auto !important;
+                right: auto !important;
+                text-align: center !important;
+                margin-top: 15px !important;
+                margin-bottom: 10px !important;
+                display: block !important;
+                font-size: 0.72rem !important;
+                opacity: 0.65 !important;
             }
         }
 
         @media (max-width: 600px) {
+            body {
+                overflow-x: hidden !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
             header {
                 padding: 15px 10px 5px !important;
             }
@@ -1238,12 +1251,25 @@
                 padding: 5px !important;
                 align-items: flex-start !important;
                 width: 100% !important;
+                box-sizing: border-box !important;
             }
             .container {
                 width: 100% !important;
                 max-width: 100% !important;
                 border-radius: 16px !important;
-                overflow: visible !important;
+                overflow: hidden !important;
+                box-sizing: border-box !important;
+            }
+            .game-section {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .sound-btn-text {
+                display: none !important;
             }
             .landing-section {
                 padding: 20px 15px !important;
@@ -1765,7 +1791,7 @@
                         </div>
                         
                         <button id="sound-toggle-btn" class="sound-toggle-btn" onclick="toggleSound()">
-                            <span>🔇 ASMR 심쿵 사운드 OFF</span>
+                            <span class="sound-btn-icon">🔇</span><span class="sound-btn-text"> ASMR 심쿵 사운드 OFF</span>
                         </button>
 
                         <div id="progress-indicator" class="progress-indicator">
@@ -2419,7 +2445,7 @@
             
             if (isSoundEnabled) {
                 initAudio();
-                btn.innerHTML = '<span>🔊 ASMR 심쿵 사운드 ON</span>';
+                btn.innerHTML = '<span class="sound-btn-icon">🔊</span><span class="sound-btn-text"> ASMR 심쿵 사운드 ON</span>';
                 btn.classList.add('active');
                 startHeartbeatLoop();
                 
@@ -2428,7 +2454,7 @@
                     playChimeSound();
                 }, 100);
             } else {
-                btn.innerHTML = '<span>🔇 ASMR 심쿵 사운드 OFF</span>';
+                btn.innerHTML = '<span class="sound-btn-icon">🔇</span><span class="sound-btn-text"> ASMR 심쿵 사운드 OFF</span>';
                 btn.classList.remove('active');
                 if (heartbeatInterval) {
                     clearInterval(heartbeatInterval);
