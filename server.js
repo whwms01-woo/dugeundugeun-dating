@@ -73,6 +73,33 @@ app.get('/assets/:filename', (req, res) => {
 // 제미나이 API 초기화
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// 공통: 제미나이 API 호출 재시도 및 마크업 제거 파싱 안전 엔진 (회복력 극대화)
+async function callGeminiWithRetry(model, prompt, retries = 2) {
+    for (let attempt = 1; attempt <= retries + 1; attempt++) {
+        try {
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            let text = response.text().trim();
+            
+            // 만약 백틱 코드 블록(```json)이 포함되어 있으면 제거
+            let cleaned = text;
+            if (cleaned.startsWith('```')) {
+                cleaned = cleaned.replace(/^```[a-zA-Z]*\n?/, '');
+                cleaned = cleaned.replace(/```$/, '');
+            }
+            
+            return JSON.parse(cleaned.trim());
+        } catch (err) {
+            console.error(`[Gemini Attempt ${attempt}] Failed to fetch or parse response:`, err);
+            if (attempt === retries + 1) {
+                throw err; // 모든 재시도가 실패하면 최종 에러 던짐
+            }
+            // 600ms 대기 후 재시도
+            await new Promise(resolve => setTimeout(resolve, 600));
+        }
+    }
+}
+
 // 1. 실시간 대화 및 호감도 평가 API
 app.post('/api/chat', async (req, res) => {
     try {
@@ -168,11 +195,8 @@ app.post('/api/chat', async (req, res) => {
             }`;
         }
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        let text = response.text().trim();
-
-        res.json(JSON.parse(text));
+        const chatResponse = await callGeminiWithRetry(model, prompt);
+        res.json(chatResponse);
     } catch (error) {
         console.error('Chat API Error:', error);
         res.status(500).json({ error: error.message || "대화 생성 중 오류가 발생했습니다." });
@@ -227,11 +251,8 @@ app.post('/api/result', async (req, res) => {
             "futurePrediction": "10년 뒤 미래 모습 한 줄 예측"
         }`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        let text = response.text().trim();
-
-        res.json(JSON.parse(text));
+        const resultResponse = await callGeminiWithRetry(model, prompt);
+        res.json(resultResponse);
     } catch (error) {
         console.error('Result API Error:', error);
         res.status(500).json({ error: error.message || "성적표 생성 중 오류가 발생했습니다." });
