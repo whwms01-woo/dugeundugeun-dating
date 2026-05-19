@@ -2647,12 +2647,13 @@
                         // 5. 10 Seconds Countdown Timer inside Chat Input Box placeholder
                         let secondsLeft = 10;
                         chatInputEl.placeholder = `대화창 강제 종료 ${secondsLeft}초 전... ⏳`;
+                        playTickSound(secondsLeft); // Play initial suspenseful tick
  
                         const countdownInterval = setInterval(() => {
                             secondsLeft--;
                             if (secondsLeft > 0) {
                                 chatInputEl.placeholder = `대화창 강제 종료 ${secondsLeft}초 전... ⏳`;
-                                playPopSound(); // Suspenseful ticking tone
+                                playTickSound(secondsLeft); // Dynamic pitch-up tick sound!
                             } else {
                                 chatInputEl.placeholder = `조기 정산 중... 🔮`;
                                 clearInterval(countdownInterval);
@@ -2951,7 +2952,7 @@
             }
         }
 
-        // Synthesize low-frequency organic lub-dub heartbeat sound
+        // Synthesize low-frequency organic lub-dub heartbeat sound with dynamic pitches
         function playHeartbeatSound() {
             if (!isSoundEnabled) return;
             initAudio();
@@ -2961,13 +2962,33 @@
 
             const now = audioCtx.currentTime;
             
+            // DYNAMIC TUNING BASED ON EXCITEMENT
+            let baseFreq1 = 55;
+            let baseFreq2 = 60;
+            let vol1 = 0.35;
+            let vol2 = 0.28;
+            
+            if (currentHeartRate >= 80) {
+                // Heart fluttering madly (High pitch & strong thumping)
+                baseFreq1 = 68;
+                baseFreq2 = 74;
+                vol1 = 0.55;
+                vol2 = 0.45;
+            } else if (currentHeartRate <= 30) {
+                // Cold & depressed heart rate (Very low pitch & weak thumping)
+                baseFreq1 = 44;
+                baseFreq2 = 48;
+                vol1 = 0.22;
+                vol2 = 0.16;
+            }
+            
             // 1st Beat (Lub) - Low bass sine wave
             const osc1 = audioCtx.createOscillator();
             const gain1 = audioCtx.createGain();
             osc1.type = 'sine';
-            osc1.frequency.setValueAtTime(55, now); 
+            osc1.frequency.setValueAtTime(baseFreq1, now); 
             osc1.frequency.exponentialRampToValueAtTime(0.01, now + 0.15);
-            gain1.gain.setValueAtTime(0.35, now);
+            gain1.gain.setValueAtTime(vol1, now);
             gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
             
             osc1.connect(gain1);
@@ -2979,15 +3000,44 @@
             const osc2 = audioCtx.createOscillator();
             const gain2 = audioCtx.createGain();
             osc2.type = 'sine';
-            osc2.frequency.setValueAtTime(60, now + 0.18);
+            osc2.frequency.setValueAtTime(baseFreq2, now + 0.18);
             osc2.frequency.exponentialRampToValueAtTime(0.01, now + 0.33);
-            gain2.gain.setValueAtTime(0.28, now + 0.18);
+            gain2.gain.setValueAtTime(vol2, now + 0.18);
             gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.33);
             
             osc2.connect(gain2);
             gain2.connect(audioCtx.destination);
             osc2.start(now + 0.18);
             osc2.stop(now + 0.34);
+        }
+
+        // Synthesize high-suspense ticking clock sound where pitch rises as time runs out
+        function playTickSound(secondsLeft) {
+            if (!isSoundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const now = audioCtx.currentTime;
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'triangle';
+            // As secondsLeft goes from 10 to 1, base pitch rises from 450Hz to 1250Hz!
+            const baseFreq = 450 + (10 - secondsLeft) * 80;
+            
+            osc.frequency.setValueAtTime(baseFreq, now);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.6, now + 0.06);
+            
+            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(now);
+            osc.stop(now + 0.07);
         }
 
         // Adjust tempo of heartbeat loop based on the partner's excitement rate
