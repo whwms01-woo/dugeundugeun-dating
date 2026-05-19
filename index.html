@@ -1128,22 +1128,48 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 75, 120, 0); }
         }
 
+        .avatar-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #181135 0%, #2f2557 100%);
+            border: 3px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            position: relative;
+            box-shadow: 0 0 25px rgba(144, 97, 255, 0.2);
+            transition: all 0.5s ease;
+            overflow: hidden; /* crop the avatar picture beautifully! */
+            cursor: pointer; /* Clickable indicator */
+        }
+
+        .avatar-circle:hover {
+            transform: scale(1.05) translateY(-2px);
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 35px var(--primary-glow) !important;
+        }
+
         .sound-toggle-btn {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 30px;
+            border-radius: 50%; /* Circle shape */
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            min-height: 36px;
             color: var(--text-muted);
-            font-size: 0.8rem;
-            font-weight: 700;
-            padding: 8px 16px;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             margin-top: 0;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             outline: none;
+            padding: 0;
         }
 
         .sound-toggle-btn:hover {
@@ -1151,7 +1177,7 @@
             border-color: rgba(255, 75, 120, 0.3);
             color: var(--primary);
             box-shadow: 0 4px 20px rgba(255, 75, 120, 0.2);
-            transform: translateY(-1px);
+            transform: translateY(-2px) scale(1.08);
         }
 
         .sound-toggle-btn.active {
@@ -1408,12 +1434,14 @@
                 margin: 0 !important;
             }
             .profile-details {
-                font-size: 0.7rem !important;
+                font-size: 0.72rem !important;
                 color: #d1baff !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                max-width: 100px !important;
+                white-space: normal !important; /* Allow wrapping */
+                overflow: visible !important;
+                text-overflow: clip !important;
+                max-width: none !important; /* Remove max-width constraint */
+                line-height: 1.35 !important;
+                word-break: keep-all !important;
             }
             .profile-mbti-badge, .profile-desc {
                 display: none !important;
@@ -1451,14 +1479,20 @@
             .sound-toggle-btn {
                 grid-column: 3 !important;
                 grid-row: 2 !important;
-                padding: 3px 6px !important;
-                font-size: 0.62rem !important;
-                border-radius: 6px !important;
-                background: rgba(255, 255, 255, 0.05) !important;
-                height: 20px !important;
+                padding: 0 !important;
+                font-size: 1rem !important;
+                border-radius: 50% !important; /* Circle shape */
+                background: rgba(255, 255, 255, 0.06) !important;
+                width: 28px !important;
+                height: 28px !important;
+                min-width: 28px !important;
+                min-height: 28px !important;
                 align-self: center !important;
-                white-space: nowrap !important;
+                justify-self: center !important;
                 margin: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             .progress-indicator {
                 grid-column: 2 !important;
@@ -1587,12 +1621,26 @@
                 line-height: 1.2 !important;
             }
             .stat-card {
-                padding: 15px !important;
-                gap: 8px !important;
+                padding: 10px 4px !important;
+                gap: 2px !important;
+                border-radius: 12px !important;
             }
             .stat-circle-box {
-                transform: scale(0.9) !important;
-                margin: -5px 0 !important;
+                transform: scale(0.68) !important;
+                margin: -16px 0 -10px !important;
+                width: 90px !important;
+                height: 90px !important;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr !important; /* Force 1 horizontal row on mobile */
+                gap: 6px !important;
+                margin-bottom: 20px !important;
+                width: 100% !important;
+            }
+            .stat-name {
+                font-size: 0.68rem !important;
+                letter-spacing: -0.2px !important;
+                white-space: nowrap !important;
             }
             .feedback-card {
                 padding: 20px 15px !important;
@@ -1619,6 +1667,124 @@
             }
             .watermark {
                 display: none !important;
+            }
+        }
+
+        /* PREMIUM PROFILE IMAGE ZOOM VIEWER MODAL STYLE */
+        .profile-image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(7, 4, 18, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .profile-image-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .profile-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: rgba(20, 15, 38, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px 30px 30px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: modalPopUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes modalPopUp {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .profile-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .profile-modal-close:hover {
+            background: rgba(255, 75, 120, 0.2);
+            border-color: var(--primary);
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        .profile-modal-content img {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--secondary);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(144, 97, 255, 0.25);
+            margin-bottom: 25px;
+            background: #181135;
+            transition: transform 0.3s ease;
+        }
+        .profile-modal-content img:hover {
+            transform: scale(1.05);
+        }
+        .profile-modal-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-modal-info h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+        .profile-modal-info span {
+            background: rgba(144, 97, 255, 0.15);
+            border: 1px solid rgba(144, 97, 255, 0.4);
+            color: #c19eff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            padding: 3px 14px;
+            border-radius: 20px;
+        }
+        .profile-modal-info p {
+            font-size: 0.9rem;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+        .profile-modal-desc {
+            font-size: 0.85rem !important;
+            color: var(--text-muted) !important;
+            font-weight: 500 !important;
+            font-style: italic;
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+            margin-top: 5px;
+            width: 260px;
+            line-height: 1.4;
+        }e !important;
             }
         }
 
@@ -1738,6 +1904,7 @@
                     <div class="input-group">
                         <label for="partner-mbti">소개팅 상대방 MBTI</label>
                         <select id="partner-mbti" class="input-control">
+                            <option value="ESTJ_KODARI">💼 코다리 부장 - 라떼는 말이야... (ESTJ) 👔</option>
                             <option value="INFJ">INFJ - 감성 풍부 차분한 매력 🔮</option>
                             <option value="ENFP">ENFP - 에너제틱 하이텐션 리트리버 🐶</option>
                             <option value="INTJ">INTJ - 차갑지만 호기심 생기는 팩폭러 🤖</option>
@@ -1798,7 +1965,7 @@
                 <!-- Left profile panel -->
                 <div class="profile-panel">
                     <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <div class="profile-avatar-container">
+                        <div class="profile-avatar-container" onclick="openProfileModal()" title="프로필 크게 보기">
                             <div id="partner-avatar" class="avatar-circle">🔮</div>
                             <div class="heartbeat-element">💓</div>
                         </div>
@@ -1821,8 +1988,8 @@
                             <div id="delta-floating" class="delta-floating">+10%</div>
                         </div>
                         
-                        <button id="sound-toggle-btn" class="sound-toggle-btn" onclick="toggleSound()">
-                            <span class="sound-btn-icon">🔇</span><span class="sound-btn-text"> ASMR 심쿵 사운드 OFF</span>
+                        <button id="sound-toggle-btn" class="sound-toggle-btn" onclick="toggleSound()" title="ASMR 심쿵 사운드 ON/OFF" aria-label="ASMR 심쿵 사운드 ON/OFF">
+                            <span class="sound-btn-icon">🔇</span>
                         </button>
 
                         <div id="progress-indicator" class="progress-indicator">
@@ -1936,6 +2103,20 @@
     <!-- Watermark -->
     <div class="watermark">제작자: 우경석</div>
 
+    <!-- PREMIUM PROFILE IMAGE ZOOM VIEWER -->
+    <div id="profile-image-modal" class="profile-image-modal" onclick="closeProfileModal()">
+        <div class="profile-modal-content" onclick="event.stopPropagation()">
+            <button class="profile-modal-close" onclick="closeProfileModal()">✕</button>
+            <img id="profile-modal-img" src="" alt="확대 이미지" onclick="closeProfileModal()">
+            <div class="profile-modal-info">
+                <h3 id="profile-modal-name">이설아</h3>
+                <span id="profile-modal-mbti">INFJ</span>
+                <p id="profile-modal-details">26세 · 일러스트레이터</p>
+                <p id="profile-modal-desc" class="profile-modal-desc">"생각이 참 많은 편이에요..."</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State variables
         let selectedScenarioText = '☕ 어색함이 감도는 인스타 핫플 성수동 감성 카페';
@@ -1958,10 +2139,12 @@
             'INFJ': '🔮', 'ENFP': '🐶', 'INTJ': '🤖', 'ESTP': '🏎️',
             'INFP': '🦄', 'ISFP': '🎨', 'ENFJ': '🌟', 'ENTP': '🔥',
             'ESFP': '🎉', 'ISTP': '🛠️', 'ISFJ': '🧸', 'ISTJ': '📊',
-            'ENTJ': '👑', 'ESFJ': '🤝', 'ESTJ': '💼', 'INTP': '🧠'
+            'ENTJ': '👑', 'ESFJ': '🤝', 'ESTJ': '💼', 'INTP': '🧠',
+            'ESTJ_KODARI': '👔'
         };
 
         const descMap = {
+            'ESTJ_KODARI': '라떼는 말이야... 뼈 때리는 츤데레 부장님 👔',
             'INFJ': '신비롭고 생각이 깊은 다정한 감성가',
             'ENFP': '에너지가 통통 튀는 인간 골든 리트리버',
             'INTJ': '논리 100% 똑똑하지만 차가운 팩폭 전략가',
@@ -1989,6 +2172,13 @@
 
         // Generate Randomized Immersive Partner Profile
         function generatePartnerProfile(mbti, gender) {
+            if (mbti === 'ESTJ_KODARI') {
+                partnerName = '코다리 부장';
+                partnerAge = 45;
+                partnerJob = '개발실 기획 실장 💼';
+                partnerHobbies = '믹스커피 시음 ☕';
+                return;
+            }
             const fNames = ['이설아', '박지민', '한다은', '정서윤', '윤채원', '강민서', '임지우', '송하은', '최예진', '신지원', '조지윤', '안수아'];
             const mNames = ['이서준', '김민준', '박예준', '최도윤', '정시우', '한주원', '강하준', '윤지호', '임현우', '송준우', '신건우', '조우진'];
             
@@ -2065,9 +2255,12 @@
                 mbtiGroup = 'sj';
             }
             
-            const partnerImgSrc = (partnerGender === '여성') 
+            let partnerImgSrc = (partnerGender === '여성') 
                 ? `/assets/partner_female_${mbtiGroup}.png` 
                 : `/assets/partner_male_${mbtiGroup}.png`;
+            if (partnerMbti === 'ESTJ_KODARI') {
+                partnerImgSrc = `/assets/partner_male_kodari.png`;
+            }
                 
             document.getElementById('partner-avatar').innerHTML = `<img src="${partnerImgSrc}" alt="${partnerMbti}" class="partner-avatar-img">`;
             document.getElementById('partner-name-display').innerText = partnerName;
@@ -2476,7 +2669,7 @@
             
             if (isSoundEnabled) {
                 initAudio();
-                btn.innerHTML = '<span class="sound-btn-icon">🔊</span><span class="sound-btn-text"> ASMR 심쿵 사운드 ON</span>';
+                btn.innerHTML = '<span class="sound-btn-icon">🔊</span>';
                 btn.classList.add('active');
                 startHeartbeatLoop();
                 
@@ -2485,12 +2678,56 @@
                     playChimeSound();
                 }, 100);
             } else {
-                btn.innerHTML = '<span class="sound-btn-icon">🔇</span><span class="sound-btn-text"> ASMR 심쿵 사운드 OFF</span>';
+                btn.innerHTML = '<span class="sound-btn-icon">🔇</span>';
                 btn.classList.remove('active');
                 if (heartbeatInterval) {
                     clearInterval(heartbeatInterval);
                 }
             }
+        }
+
+        // Immersive KakaoTalk-style Profile zoom view functions
+        function openProfileModal() {
+            const imgEl = document.querySelector('.partner-avatar-img');
+            const currentImgSrc = imgEl ? imgEl.src : '';
+            
+            const modal = document.getElementById('profile-image-modal');
+            const modalImg = document.getElementById('profile-modal-img');
+            const modalName = document.getElementById('profile-modal-name');
+            const modalMbti = document.getElementById('profile-modal-mbti');
+            const modalDetails = document.getElementById('profile-modal-details');
+            const modalDesc = document.getElementById('profile-modal-desc');
+            
+            if (currentImgSrc) {
+                modalImg.src = currentImgSrc;
+                modalImg.style.display = 'block';
+            } else {
+                // fallback to default avatar emoji if mbti matching is not yet active
+                modalImg.style.display = 'none';
+            }
+            
+            modalName.innerText = partnerName || '소개팅 상대방';
+            modalMbti.innerText = partnerMbti || 'INFJ';
+            modalDetails.innerText = `${partnerAge || 26}세 · ${partnerJob || '일러스트레이터'}`;
+            modalDesc.innerText = `"${descMap[partnerMbti] || '당신과의 진솔한 매칭을 기다리는 중...'}"`;
+            
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 15);
+            
+            // Play retro romantic notification chime
+            if (isSoundEnabled) {
+                playChimeSound();
+            }
+        }
+
+        function closeProfileModal() {
+            const modal = document.getElementById('profile-image-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
         }
 
         // Synthesize a retro romantic game chime effect for successful actions
