@@ -120,7 +120,6 @@
             border-radius: 24px;
             overflow: hidden;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative; /* Position relative for the watermark (Idea 5) */
         }
 
         /* SECTION: 1. Setup Form */
@@ -1003,15 +1002,15 @@
 
         /* WATERMARK */
         .watermark {
-            position: absolute;
-            bottom: 12px;
-            right: 18px;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.25);
-            font-weight: 700;
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 1000;
             pointer-events: none;
-            letter-spacing: 0.5px;
-            z-index: 100;
+            letter-spacing: 1px;
+            font-weight: 300;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
         }
 
@@ -1272,29 +1271,6 @@
             .ambient-glow {
                 width: 250px !important;
                 height: 250px !important;
-            }
-            .watermark {
-                position: absolute !important;
-                bottom: 8px !important; /* Locks perfectly at the bottom corner of the card */
-                right: 12px !important;
-                left: auto !important;
-                transform: none !important;
-                text-align: right !important;
-                margin: 0 !important;
-                display: block !important;
-                font-size: 0.65rem !important;
-                opacity: 0.35 !important; /* Faint and subtle as requested */
-                z-index: 10000 !important;
-                background: transparent !important;
-                padding: 0 !important;
-                border-radius: 0 !important;
-                border: none !important;
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
-                color: rgba(255, 255, 255, 0.3) !important;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
-                box-shadow: none !important;
-                pointer-events: none !important;
             }
         }
 
@@ -2056,6 +2032,9 @@
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
 
+    <!-- Fixed Watermark outside of cards (Saju Tarot Method) -->
+    <div class="watermark">제작자: 우경석</div>
+
     <header>
         <h1>두근두근 대작전 💖</h1>
         <p>AI와 소개팅으로 연애세포를 깨워보세요.</p>
@@ -2323,8 +2302,6 @@
                 <button class="reset-btn" onclick="resetGame()">처음으로 가기</button>
             </div>
 
-            <!-- Watermark inside container for absolute, rock-solid visibility -->
-            <div class="watermark">제작자: 우경석</div>
         </div>
     </main>
 
