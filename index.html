@@ -1535,15 +1535,6 @@
                         </select>
                     </div>
 
-                    <div class="input-group" style="grid-column: span 2;">
-                        <label for="max-turns">데이트 대화 분량 (총 대화 횟수)</label>
-                        <select id="max-turns" class="input-control">
-                            <option value="10" selected>☕ 가볍게 썸타기 (대화 10번)</option>
-                            <option value="20">💖 본격적으로 꽁냥꽁냥 (대화 20번)</option>
-                            <option value="30">🔥 지독하게 과몰입하기 (대화 30번)</option>
-                        </select>
-                    </div>
-
                     <div class="scenario-container">
                         <label>소개팅 매칭 장소</label>
                         <div class="scenario-grid">
@@ -1769,7 +1760,7 @@
             userGender = document.getElementById('user-gender').value;
             userMbti = document.getElementById('user-mbti').value;
             partnerMbti = document.getElementById('partner-mbti').value;
-            maxTurns = parseInt(document.getElementById('max-turns').value);
+            maxTurns = 30;
 
             if (!userName) {
                 alert('내 이름을 입력해주세요!');
