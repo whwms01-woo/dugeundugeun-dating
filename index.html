@@ -1191,7 +1191,8 @@
                 padding: 12px !important;
             }
             .game-section {
-                grid-template-columns: 1fr !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
             .profile-panel {
                 border-right: none !important;
@@ -1271,7 +1272,8 @@
                 box-sizing: border-box !important;
             }
             .game-section {
-                grid-template-columns: 1fr !important;
+                display: flex !important;
+                flex-direction: column !important;
                 gap: 12px !important;
                 width: 100% !important;
                 max-width: 100% !important;
@@ -1352,24 +1354,28 @@
                 box-sizing: border-box !important;
             }
              .profile-panel {
-                display: grid !important;
-                grid-template-columns: auto 1fr auto !important;
-                grid-template-rows: auto auto !important;
+                display: flex !important;
+                flex-direction: column !important;
                 padding: 10px 14px !important;
-                gap: 8px 12px !important;
+                gap: 10px !important;
                 border-radius: 16px !important;
                 background: rgba(18, 10, 36, 0.6) !important;
                 border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
             .profile-panel > div:first-child {
-                grid-column: 1 !important;
-                grid-row: 1 / span 2 !important;
-                flex-direction: row !important;
-                width: auto !important;
-                gap: 0px !important;
+                display: grid !important;
+                grid-template-columns: auto 1fr auto !important;
+                grid-template-rows: auto auto !important;
+                gap: 8px 12px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
                 margin: 0 !important;
             }
             .profile-avatar-container {
+                grid-column: 1 !important;
+                grid-row: 1 / span 2 !important;
                 width: 48px !important;
                 height: 48px !important;
                 margin: 0 !important;
