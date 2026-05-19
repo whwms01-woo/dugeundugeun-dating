@@ -1781,7 +1781,7 @@
             color: #fff;
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
-        .profile-modal-info span {
+        .profile-modal-info > span {
             background: rgba(144, 97, 255, 0.15);
             border: 1px solid rgba(144, 97, 255, 0.4);
             color: #c19eff;
@@ -1806,8 +1806,36 @@
             margin-top: 5px;
             width: 260px;
             line-height: 1.4;
-        }e !important;
-            }
+        }
+        
+        /* Premium detail badges container */
+        .profile-modal-details-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            margin-bottom: 5px;
+            max-width: 320px;
+            width: 100%;
+        }
+        .profile-modal-detail-tag {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .profile-modal-detail-tag .label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .profile-modal-detail-tag .value {
+            color: var(--accent-green);
+            font-weight: 700;
         }
 
         /* 3D FLOATING HEARTS BACKGROUND EFFECT */
@@ -2132,7 +2160,7 @@
             <div class="profile-modal-info">
                 <h3 id="profile-modal-name">이설아</h3>
                 <span id="profile-modal-mbti">INFJ</span>
-                <p id="profile-modal-details">26세 · 일러스트레이터</p>
+                <div id="profile-modal-details" class="profile-modal-details-container"></div>
                 <p id="profile-modal-desc" class="profile-modal-desc">"생각이 참 많은 편이에요..."</p>
             </div>
         </div>
@@ -2591,6 +2619,7 @@
         function resetGame() {
             document.getElementById('result-section').style.display = 'none';
             document.getElementById('setup-section').style.display = 'none';
+            document.getElementById('game-section').style.display = 'none';
             document.getElementById('landing-section').style.display = 'flex';
             
             // Reset circles
@@ -2600,6 +2629,20 @@
             document.getElementById('stat-val-sense').innerText = '0%';
             document.getElementById('stat-val-flutter').innerText = '0%';
             document.getElementById('stat-val-frustrate').innerText = '0%';
+            
+            // Clear chat history & details
+            document.getElementById('chat-body').innerHTML = `
+                <div id="typing-loader" class="typing-loader">
+                    <div class="typing-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            dialogueTurnCount = 0;
+            dialogueHistory = [];
+            currentHeartRate = 50;
         }
 
         // 3D Starry Heart Falling Engine
@@ -2758,14 +2801,18 @@
             
             // Rich descriptive labels for age, job, and hobbies with elegant color highlights
             modalDetails.innerHTML = `
-                <span style="color: #a69bb8; font-weight: 500; font-size: 0.85rem;">나이:</span> 
-                <span style="color: #00f2fe; font-weight: 700;">${partnerAge || 26}세</span> 
-                &nbsp;&nbsp;&nbsp;
-                <span style="color: #a69bb8; font-weight: 500; font-size: 0.85rem;">직업:</span> 
-                <span style="color: #00f2fe; font-weight: 700;">${partnerJob || '일러스트레이터'}</span> 
-                &nbsp;&nbsp;&nbsp;
-                <span style="color: #a69bb8; font-weight: 500; font-size: 0.85rem;">취미:</span> 
-                <span style="color: #00f2fe; font-weight: 700;">${partnerHobbies || 'LP 수집'}</span>
+                <div class="profile-modal-detail-tag">
+                    <span class="label">나이</span>
+                    <span class="value">${partnerAge || 26}세</span>
+                </div>
+                <div class="profile-modal-detail-tag">
+                    <span class="label">직업</span>
+                    <span class="value">${partnerJob || '일러스트레이터'}</span>
+                </div>
+                <div class="profile-modal-detail-tag">
+                    <span class="label">취미</span>
+                    <span class="value">${partnerHobbies || 'LP 수집'}</span>
+                </div>
             `;
             
             modalDesc.innerText = `"${descMap[partnerMbti] || '당신과의 진솔한 매칭을 기다리는 중...'}"`;
