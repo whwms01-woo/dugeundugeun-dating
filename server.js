@@ -32,7 +32,11 @@ const sourceImages = {
     'partner_female_nf.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nf_1779170424885.png',
     'partner_male_nf.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nf_1779170443939.png',
     'partner_female_nt.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nt_1779170462994.png',
-    'partner_male_nt.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nt_1779170484783.png'
+    'partner_male_nt.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nt_1779170484783.png',
+    'partner_female_sp.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_sp_1779174665769.png',
+    'partner_male_sp.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_sp_1779174713138.png',
+    'partner_female_sj.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_sj_1779174692215.png',
+    'partner_male_sj.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_sj_1779174733393.png'
 };
 
 for (const [destName, srcPath] of Object.entries(sourceImages)) {
@@ -47,62 +51,15 @@ for (const [destName, srcPath] of Object.entries(sourceImages)) {
     }
 }
 
-// 메인 일러스트 이미지 서빙 라우트 (클라우드 환경에서는 assets 폴더에서 로드, 로컬은 브레인 경로 폴백)
-app.get('/assets/dating_main.png', (req, res) => {
-    const localAssetPath = path.join(assetsDir, 'dating_main.png');
-    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\dating_refined_cover_1779169341966.png';
-    if (fs.existsSync(localAssetPath)) {
-        res.sendFile(localAssetPath);
-    } else if (fs.existsSync(fallbackPath)) {
-        res.sendFile(fallbackPath);
-    } else {
-        res.status(404).send('Image not found');
-    }
-});
+// 에셋 통합 서빙 라우트 (클라우드/로컬 가변 호환 하이브리드 서빙)
+app.get('/assets/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const localAssetPath = path.join(assetsDir, filename);
+    const fallbackPath = sourceImages[filename];
 
-// 캐릭터 일러스트 이미지 서빙 라우트들 (클라우드/로컬 가변 호환 하이브리드 서빙)
-app.get('/assets/partner_female_nf.png', (req, res) => {
-    const localAssetPath = path.join(assetsDir, 'partner_female_nf.png');
-    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nf_1779170424885.png';
     if (fs.existsSync(localAssetPath)) {
         res.sendFile(localAssetPath);
-    } else if (fs.existsSync(fallbackPath)) {
-        res.sendFile(fallbackPath);
-    } else {
-        res.status(404).send('Image not found');
-    }
-});
-
-app.get('/assets/partner_male_nf.png', (req, res) => {
-    const localAssetPath = path.join(assetsDir, 'partner_male_nf.png');
-    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nf_1779170443939.png';
-    if (fs.existsSync(localAssetPath)) {
-        res.sendFile(localAssetPath);
-    } else if (fs.existsSync(fallbackPath)) {
-        res.sendFile(fallbackPath);
-    } else {
-        res.status(404).send('Image not found');
-    }
-});
-
-app.get('/assets/partner_female_nt.png', (req, res) => {
-    const localAssetPath = path.join(assetsDir, 'partner_female_nt.png');
-    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nt_1779170462994.png';
-    if (fs.existsSync(localAssetPath)) {
-        res.sendFile(localAssetPath);
-    } else if (fs.existsSync(fallbackPath)) {
-        res.sendFile(fallbackPath);
-    } else {
-        res.status(404).send('Image not found');
-    }
-});
-
-app.get('/assets/partner_male_nt.png', (req, res) => {
-    const localAssetPath = path.join(assetsDir, 'partner_male_nt.png');
-    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nt_1779170484783.png';
-    if (fs.existsSync(localAssetPath)) {
-        res.sendFile(localAssetPath);
-    } else if (fs.existsSync(fallbackPath)) {
+    } else if (fallbackPath && fs.existsSync(fallbackPath)) {
         res.sendFile(fallbackPath);
     } else {
         res.status(404).send('Image not found');
@@ -194,7 +151,7 @@ app.post('/api/chat', async (req, res) => {
 // 2. 최종 소개팅 성적표 및 피드백 생성 API
 app.post('/api/result', async (req, res) => {
     try {
-        const { userName, userMbti, partnerMbti, scenario, history, finalHeartRate } = req.body;
+        const { userName, userMbti, partnerMbti, scenario, history, finalHeartRate, isEarly } = req.body;
 
         const model = genAI.getGenerativeModel({ 
             model: "gemini-3.1-flash-lite",
@@ -204,15 +161,16 @@ app.post('/api/result', async (req, res) => {
         const formattedHistory = history.map(h => `${h.sender === 'user' ? '유저' : partnerMbti + ' 파트너'}: ${h.text}`).join('\n');
 
         const prompt = `너는 대한민국 최고의 소개팅 연애 상담 전문가이자 뼈 때리는 연애 도사야.
-        유저와 파트너가 나눈 5턴의 소개팅 대화 내역과 최종 호감도를 분석하여 성적표(리포트 카드)를 작성해줘.
+        유저와 파트너가 나눈 소개팅 대화 내역과 최종 호감도를 분석하여 성적표(리포트 카드)를 작성해줘.
         
         [소개팅 요약 정보]
         - 유저 이름: ${userName || '익명'} (MBTI: ${userMbti})
         - 상대방 MBTI: ${partnerMbti}
         - 데이트 장소: ${scenario}
         - 최종 호감도 점수: ${finalHeartRate}%
+        - 조기 종료 여부: ${isEarly ? '예 (중간 정산 - 대화 도중 유저가 먼저 데이트를 중단함)' : '아니오 (풀코스 데이트 완료)'}
         
-        [전체 대화 내역]
+        [전체 대화 내역 (총 ${history.length}줄)]
         ${formattedHistory}
         
         [작성 조건]
@@ -220,11 +178,12 @@ app.post('/api/result', async (req, res) => {
            - 80% 이상: "Green Light! 연인 발전 각 🟢" (커플 성공, 달달함 초과)
            - 40% 이상 80% 미만: "Soso... 친한 친구 각 🟡" (애매함, 친구 이상 연인 미만)
            - 40% 미만: "Red Light! 주선자 멱살 각 🔴" (폭망, 파토, 카톡 차단 각)
+           * 만약 조기 종료(isEarly가 참)라면, status 문구에 "중간 정산 ⚠️" 머리글을 붙이고 상황(도망침, 런, 썸 중단 등)을 위트있게 풍자해줘. (예: "중간 정산 ⚠️ 야근 핑계 대고 도망 각 🏃‍♂️")
         2. 다음 세 가지 세부 역량 점수(0~100 정수)를 유저의 대화 방식과 드립 센스를 바탕으로 평가해줘:
            - 대화 센스(scoreSense): 상대방의 말에 호응하고 재치 있게 받아친 정도.
            - 설렘 지수(scoreFlutter): 상대방의 마음을 심쿵하게 만든 멘트의 퀄리티.
            - 답답 고구마 지수(scoreFrustration): 엉뚱한 소리를 하거나 눈치 없는 멘트로 꽁기하게 만든 답답함의 수준.
-        3. 피드백 총평(summary)은 팩폭 스타일과 연애 조언을 섞어서 3~4문장으로 재미있게 분석해줘.
+        3. 피드백 총평(summary)은 팩폭 스타일과 연애 조언을 섞어서 3~4문장으로 재미있게 분석해줘. 특히 조기 종료(isEarly가 참)라면 "왜 데이트를 중간에 멈췄을지"에 대해 (눈치 없이 헛소리해서 상대가 표정관리가 안 돼서 튀었거나, 혹은 너무 설레서 심장이 폭발하기 전에 런했다는 등) 기상천외한 추리를 섞어 재미있게 팩트 폭행해줘.
         4. 미래 예측(futurePrediction)은 "두 사람이 10년 뒤에 무엇을 하고 있을지"에 대해 매우 기발하고 코믹하게 한 줄로 예측해줘.
         
         반드시 아래 JSON 형식으로만 답변해:
