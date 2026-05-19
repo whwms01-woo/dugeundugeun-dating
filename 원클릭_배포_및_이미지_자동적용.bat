@@ -13,28 +13,88 @@ set "TARGET_DIR=%~dp0assets"
 echo [Step 1] 고화질 AI 캐릭터 이미지를 assets 폴더로 복사 및 적용 중...
 echo.
 
-:: 1. partner_female_1 복사
+:: 1. Female partners 1-10 복사
 for %%F in ("%SOURCE_DIR%\partner_female_1_*.png") do (
     echo [여성 1번] 발견: %%~nxF -^> partner_female_1.png 적용 완료
     copy /y "%%F" "%TARGET_DIR%\partner_female_1.png" > nul
 )
-
-:: 2. partner_female_2 복사
 for %%F in ("%SOURCE_DIR%\partner_female_2_*.png") do (
     echo [여성 2번] 발견: %%~nxF -^> partner_female_2.png 적용 완료
     copy /y "%%F" "%TARGET_DIR%\partner_female_2.png" > nul
 )
+for %%F in ("%SOURCE_DIR%\partner_female_3_*.png") do (
+    echo [여성 3번] 발견: %%~nxF -^> partner_female_3.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_3.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_4_*.png") do (
+    echo [여성 4번] 발견: %%~nxF -^> partner_female_4.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_4.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_5_*.png") do (
+    echo [여성 5번] 발견: %%~nxF -^> partner_female_5.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_5.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_6_*.png") do (
+    echo [여성 6번] 발견: %%~nxF -^> partner_female_6.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_6.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_7_*.png") do (
+    echo [여성 7번] 발견: %%~nxF -^> partner_female_7.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_7.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_8_*.png") do (
+    echo [여성 8번] 발견: %%~nxF -^> partner_female_8.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_8.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_9_*.png") do (
+    echo [여성 9번] 발견: %%~nxF -^> partner_female_9.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_9.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_female_10_*.png") do (
+    echo [여성 10번] 발견: %%~nxF -^> partner_female_10.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_female_10.png" > nul
+)
 
-:: 3. partner_male_1 복사
+:: 2. Male partners 1-10 복사
 for %%F in ("%SOURCE_DIR%\partner_male_1_*.png") do (
     echo [남성 1번] 발견: %%~nxF -^> partner_male_1.png 적용 완료
     copy /y "%%F" "%TARGET_DIR%\partner_male_1.png" > nul
 )
-
-:: 4. partner_male_2 복사
 for %%F in ("%SOURCE_DIR%\partner_male_2_*.png") do (
     echo [남성 2번] 발견: %%~nxF -^> partner_male_2.png 적용 완료
     copy /y "%%F" "%TARGET_DIR%\partner_male_2.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_3_*.png") do (
+    echo [남성 3번] 발견: %%~nxF -^> partner_male_3.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_3.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_4_*.png") do (
+    echo [남성 4번] 발견: %%~nxF -^> partner_male_4.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_4.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_5_*.png") do (
+    echo [남성 5번] 발견: %%~nxF -^> partner_male_5.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_5.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_6_*.png") do (
+    echo [남성 6번] 발견: %%~nxF -^> partner_male_6.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_6.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_7_*.png") do (
+    echo [남성 7번] 발견: %%~nxF -^> partner_male_7.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_7.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_8_*.png") do (
+    echo [남성 8번] 발견: %%~nxF -^> partner_male_8.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_8.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_9_*.png") do (
+    echo [남성 9번] 발견: %%~nxF -^> partner_male_9.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_9.png" > nul
+)
+for %%F in ("%SOURCE_DIR%\partner_male_10_*.png") do (
+    echo [남성 10번] 발견: %%~nxF -^> partner_male_10.png 적용 완료
+    copy /y "%%F" "%TARGET_DIR%\partner_male_10.png" > nul
 )
 
 echo.
