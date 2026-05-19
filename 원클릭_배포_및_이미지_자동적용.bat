@@ -109,7 +109,7 @@ git add .
 
 echo.
 echo [Step 3] 로컬 배포 커밋 생성 중 (git commit)...
-git commit -m "fix: optimize mobile UI header and implement interactive inner-mind overlay modal"
+git commit -m "fix: resolve mobile watermark display and anchor properly to bottom right corner"
 
 echo.
 echo [Step 4] 실서버 라이브 전송 중 (git push origin main)...

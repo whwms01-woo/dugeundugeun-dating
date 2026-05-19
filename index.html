@@ -1257,24 +1257,25 @@
             }
             .watermark {
                 position: fixed !important;
-                bottom: 10px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                right: auto !important;
-                text-align: center !important;
+                bottom: 18px !important;
+                right: 18px !important;
+                left: auto !important;
+                transform: none !important;
+                text-align: right !important;
                 margin: 0 !important;
                 display: block !important;
-                font-size: 0.72rem !important;
-                opacity: 1 !important;
-                z-index: 9999 !important;
-                background: rgba(18, 10, 36, 0.85) !important;
-                padding: 5px 12px !important;
-                border-radius: 20px !important;
-                border: 1px solid rgba(255, 75, 120, 0.25) !important;
-                backdrop-filter: blur(6px) !important;
-                color: #d1baff !important;
-                text-shadow: 0 0 5px rgba(209, 186, 255, 0.4) !important;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+                font-size: 0.7rem !important;
+                opacity: 0.45 !important;
+                z-index: 1000000 !important; /* Force to top-most layer so it never gets hidden */
+                background: transparent !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                border: none !important;
+                backdrop-filter: none !important;
+                color: rgba(255, 255, 255, 0.4) !important;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+                box-shadow: none !important;
+                pointer-events: none !important;
             }
         }
 
