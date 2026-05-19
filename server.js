@@ -4,8 +4,14 @@ import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 // 환경 변수 로드
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,28 +21,92 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('./'));
 
-// 메인 일러스트 이미지 서빙 라우트
+// 서버 구동 시 로컬 에셋(assets) 폴더 자동 생성 및 이미지 파일 복사 튜닝
+const assetsDir = path.join(__dirname, 'assets');
+if (!fs.existsSync(assetsDir)) {
+    fs.mkdirSync(assetsDir, { recursive: true });
+}
+
+const sourceImages = {
+    'dating_main.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\dating_refined_cover_1779169341966.png',
+    'partner_female_nf.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nf_1779170424885.png',
+    'partner_male_nf.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nf_1779170443939.png',
+    'partner_female_nt.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nt_1779170462994.png',
+    'partner_male_nt.png': 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nt_1779170484783.png'
+};
+
+for (const [destName, srcPath] of Object.entries(sourceImages)) {
+    const destPath = path.join(assetsDir, destName);
+    if (!fs.existsSync(destPath) && fs.existsSync(srcPath)) {
+        try {
+            fs.copyFileSync(srcPath, destPath);
+            console.log(`[Asset Setup] Successfully copied ${destName} locally!`);
+        } catch (e) {
+            console.error(`[Asset Setup] Failed to copy ${destName}:`, e);
+        }
+    }
+}
+
+// 메인 일러스트 이미지 서빙 라우트 (클라우드 환경에서는 assets 폴더에서 로드, 로컬은 브레인 경로 폴백)
 app.get('/assets/dating_main.png', (req, res) => {
-    const imgPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\dating_refined_cover_1779169341966.png';
-    if (fs.existsSync(imgPath)) {
-        res.sendFile(imgPath);
+    const localAssetPath = path.join(assetsDir, 'dating_main.png');
+    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\dating_refined_cover_1779169341966.png';
+    if (fs.existsSync(localAssetPath)) {
+        res.sendFile(localAssetPath);
+    } else if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
     } else {
         res.status(404).send('Image not found');
     }
 });
 
-// 캐릭터 일러스트 이미지 서빙 라우트들
+// 캐릭터 일러스트 이미지 서빙 라우트들 (클라우드/로컬 가변 호환 하이브리드 서빙)
 app.get('/assets/partner_female_nf.png', (req, res) => {
-    res.sendFile('C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nf_1779170424885.png');
+    const localAssetPath = path.join(assetsDir, 'partner_female_nf.png');
+    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nf_1779170424885.png';
+    if (fs.existsSync(localAssetPath)) {
+        res.sendFile(localAssetPath);
+    } else if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
+    } else {
+        res.status(404).send('Image not found');
+    }
 });
+
 app.get('/assets/partner_male_nf.png', (req, res) => {
-    res.sendFile('C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nf_1779170443939.png');
+    const localAssetPath = path.join(assetsDir, 'partner_male_nf.png');
+    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nf_1779170443939.png';
+    if (fs.existsSync(localAssetPath)) {
+        res.sendFile(localAssetPath);
+    } else if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
+    } else {
+        res.status(404).send('Image not found');
+    }
 });
+
 app.get('/assets/partner_female_nt.png', (req, res) => {
-    res.sendFile('C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nt_1779170462994.png');
+    const localAssetPath = path.join(assetsDir, 'partner_female_nt.png');
+    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_female_nt_1779170462994.png';
+    if (fs.existsSync(localAssetPath)) {
+        res.sendFile(localAssetPath);
+    } else if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
+    } else {
+        res.status(404).send('Image not found');
+    }
 });
+
 app.get('/assets/partner_male_nt.png', (req, res) => {
-    res.sendFile('C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nt_1779170484783.png');
+    const localAssetPath = path.join(assetsDir, 'partner_male_nt.png');
+    const fallbackPath = 'C:\\Users\\itdm_\\.gemini\\antigravity\\brain\\d0ab74b5-2eb5-4423-8b52-606fa7665ced\\partner_male_nt_1779170484783.png';
+    if (fs.existsSync(localAssetPath)) {
+        res.sendFile(localAssetPath);
+    } else if (fs.existsSync(fallbackPath)) {
+        res.sendFile(fallbackPath);
+    } else {
+        res.status(404).send('Image not found');
+    }
 });
 
 // 제미나이 API 초기화
