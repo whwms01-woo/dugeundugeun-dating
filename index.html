@@ -1003,15 +1003,22 @@
         /* WATERMARK */
         .watermark {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 24px;
+            right: 24px;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.85);
             font-weight: 700;
             pointer-events: none;
             letter-spacing: 0.5px;
             z-index: 100;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
         }
 
         /* Cover Art Container */
@@ -1274,24 +1281,25 @@
             }
             .watermark {
                 position: fixed !important;
-                bottom: 18px !important;
-                right: 18px !important;
+                bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+                right: 20px !important;
                 left: auto !important;
                 transform: none !important;
                 text-align: right !important;
                 margin: 0 !important;
                 display: block !important;
                 font-size: 0.7rem !important;
-                opacity: 0.45 !important;
+                opacity: 0.8 !important; /* Increase opacity so it is clearly visible on glare-prone screens */
                 z-index: 1000000 !important; /* Force to top-most layer so it never gets hidden */
-                background: transparent !important;
-                padding: 0 !important;
-                border-radius: 0 !important;
-                border: none !important;
-                backdrop-filter: none !important;
-                color: rgba(255, 255, 255, 0.4) !important;
-                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
-                box-shadow: none !important;
+                background: rgba(0, 0, 0, 0.45) !important; /* Elegant dark glassmorphism capsule */
+                padding: 4px 8px !important;
+                border-radius: 6px !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                backdrop-filter: blur(4px) !important;
+                -webkit-backdrop-filter: blur(4px) !important;
+                color: rgba(255, 255, 255, 0.9) !important;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
                 pointer-events: none !important;
             }
         }
