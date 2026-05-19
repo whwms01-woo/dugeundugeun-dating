@@ -124,31 +124,49 @@ app.get('/assets/:filename', (req, res) => {
 // 제미나이 API 초기화
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// 공통: 제미나이 API 호출 재시도 및 마크업 제거 파싱 안전 엔진 (회복력 극대화)
-async function callGeminiWithRetry(model, prompt, retries = 2) {
-    for (let attempt = 1; attempt <= retries + 1; attempt++) {
-        try {
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            let text = response.text().trim();
-            
-            // 만약 백틱 코드 블록(```json)이 포함되어 있으면 제거
-            let cleaned = text;
-            if (cleaned.startsWith('```')) {
-                cleaned = cleaned.replace(/^```[a-zA-Z]*\n?/, '');
-                cleaned = cleaned.replace(/```$/, '');
+// Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction (회복력 극대화)
+async function generateGeminiContentWithRetry(prompt, retries = 1) {
+    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash", "gemini-1.5-flash-latest"];
+    const errors = [];
+
+    for (const modelName of models) {
+        for (let attempt = 1; attempt <= retries + 1; attempt++) {
+            try {
+                console.log(`[Gemini] Attempting generation with model: ${modelName} (Attempt ${attempt})...`);
+                const model = genAI.getGenerativeModel({ 
+                    model: modelName,
+                    generationConfig: { responseMimeType: "application/json" }
+                });
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                let text = response.text().trim();
+                
+                // Clean up markdown block if present
+                text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+                
+                // Extract strictly from { to } (Safe JSON boundaries)
+                const startIndex = text.indexOf('{');
+                const endIndex = text.lastIndexOf('}');
+                if (startIndex !== -1 && endIndex !== -1) {
+                    text = text.substring(startIndex, endIndex + 1);
+                }
+                
+                const jsonResult = JSON.parse(text);
+                console.log(`[Gemini] Successfully generated and parsed content using model: ${modelName}!`);
+                return jsonResult;
+            } catch (err) {
+                console.error(`[Gemini] Model ${modelName} (Attempt ${attempt}) failed:`, err.message);
+                errors.push(`${modelName} (Attempt ${attempt}): ${err.message}`);
+                
+                if (attempt <= retries) {
+                    // 500ms delay before retry
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
             }
-            
-            return JSON.parse(cleaned.trim());
-        } catch (err) {
-            console.error(`[Gemini Attempt ${attempt}] Failed to fetch or parse response:`, err);
-            if (attempt === retries + 1) {
-                throw err; // 모든 재시도가 실패하면 최종 에러 던짐
-            }
-            // 600ms 대기 후 재시도
-            await new Promise(resolve => setTimeout(resolve, 600));
         }
     }
+    
+    throw new Error(`모든 AI 모델 호출 실패:\n- ${errors.join('\n- ')}`);
 }
 
 // 1. 실시간 대화 및 호감도 평가 API
@@ -169,10 +187,7 @@ app.post('/api/chat', async (req, res) => {
             partnerHobbies
         } = req.body;
 
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-3.1-flash-lite",
-            generationConfig: { responseMimeType: "application/json" }
-        });
+        // Model initialization is now handled dynamically in generateGeminiContentWithRetry
 
         let prompt = "";
 
@@ -249,7 +264,7 @@ app.post('/api/chat', async (req, res) => {
             }`;
         }
 
-        const chatResponse = await callGeminiWithRetry(model, prompt);
+        const chatResponse = await generateGeminiContentWithRetry(prompt);
         res.json(chatResponse);
     } catch (error) {
         console.error('Chat API Error:', error);
@@ -262,10 +277,7 @@ app.post('/api/result', async (req, res) => {
     try {
         const { userName, userMbti, partnerMbti, scenario, history, finalHeartRate, isEarly } = req.body;
 
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-3.1-flash-lite",
-            generationConfig: { responseMimeType: "application/json" }
-        });
+        // Model initialization is now handled dynamically in generateGeminiContentWithRetry
 
         const formattedHistory = history.map(h => `${h.sender === 'user' ? '유저' : partnerMbti + ' 파트너'}: ${h.text}`).join('\n');
 
@@ -294,6 +306,8 @@ app.post('/api/result', async (req, res) => {
            - 답답 고구마 지수(scoreFrustration): 엉뚱한 소리를 하거나 눈치 없는 멘트로 꽁기하게 만든 답답함의 수준.
         3. 피드백 총평(summary)은 팩폭 스타일과 연애 조언을 섞어서 3~4문장으로 재미있게 분석해줘. 특히 조기 종료(isEarly가 참)라면 "왜 데이트를 중간에 멈췄을지"에 대해 (눈치 없이 헛소리해서 상대가 표정관리가 안 돼서 튀었거나, 혹은 너무 설레서 심장이 폭발하기 전에 런했다는 등) 기상천외한 추리를 섞어 재미있게 팩트 폭행해줘.
         4. 미래 예측(futurePrediction)은 "두 사람이 10년 뒤에 무엇을 하고 있을지"에 대해 매우 기발하고 코믹하게 한 줄로 예측해줘.
+        5. 비밀 일기장(secretDiary)은 상대방 파트너의 1인칭 시점으로 오늘 유저와 나눴던 대화와 최종 감정에 대한 솔직한 심경을 적어두는 다이어리 형식(3~4문장)으로 작성해줘. 호감도가 높으면 달달하게 설레어하고, 낮으면 쌀쌀맞거나 어이없어하는 심리를 극사실적으로 살려야 해.
+        6. 카톡 애프터 메시(afterMessage)는 오늘 밤 파트너가 유저에게 보낼 리얼한 카카오톡 애프터 메시지 형식으로 작성해줘. (호감도가 높으면 긴장감과 하트 섞인 애프터 제안, 낮으면 정중하지만 선 긋는 거절, 아주 낮으면 읽씹을 대체하여 주선자나 친구에게 단톡방에서 늘어놓는 분노의 하소연 멘트)
         
         반드시 아래 JSON 형식으로만 답변해:
         {
@@ -302,10 +316,12 @@ app.post('/api/result', async (req, res) => {
             "scoreFlutter": 설렘지수점수(정수),
             "scoreFrustration": 고구마지수점수(정수),
             "summary": "총평 분석 및 피드백 내용",
-            "futurePrediction": "10년 뒤 미래 모습 한 줄 예측"
+            "futurePrediction": "10년 뒤 미래 모습 한 줄 예측",
+            "secretDiary": "상대방의 비밀 속마음 일기 내용",
+            "afterMessage": "오늘 밤 상대방이 유저에게 보낼 리얼 카카오톡 메시지"
         }`;
 
-        const resultResponse = await callGeminiWithRetry(model, prompt);
+        const resultResponse = await generateGeminiContentWithRetry(prompt);
         res.json(resultResponse);
     } catch (error) {
         console.error('Result API Error:', error);
@@ -313,7 +329,58 @@ app.post('/api/result', async (req, res) => {
     }
 });
 
+// Diagnosis endpoint accessible via browser
+app.get('/api/diag', async (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    const diag = {
+        apiKeyStatus: apiKey ? `LOADED (Length: ${apiKey.length})` : "NOT LOADED",
+        apiKeyPreview: apiKey ? `${apiKey.substring(0, 5)}...${apiKey.slice(-5)}` : "NONE",
+        models: [],
+        error: null
+    };
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        const data = await response.json();
+        if (data.models) {
+            diag.models = data.models.map(m => m.name);
+        } else if (data.error) {
+            diag.error = data.error.message;
+        } else {
+            diag.error = JSON.stringify(data);
+        }
+    } catch (err) {
+        diag.error = err.message;
+    }
+    res.json(diag);
+});
+
 // 서버 실행
 app.listen(port, () => {
     console.log(`Dating Simulator Server is running at http://localhost:${port}`);
 });
+
+// Startup Diagnostic Logs to debug API key and model availability
+(async () => {
+    console.log("=== STARTUP DIAGNOSTICS ===");
+    const apiKey = process.env.GEMINI_API_KEY;
+    console.log("GEMINI_API_KEY status:", apiKey ? `LOADED (Length: ${apiKey.length})` : "NOT LOADED");
+    if (apiKey) {
+        console.log("GEMINI_API_KEY preview:", `${apiKey.substring(0, 5)}...${apiKey.slice(-5)}`);
+        try {
+            console.log("[Diagnostic] Fetching available models from Google API...");
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            const data = await response.json();
+            if (data.models) {
+                console.log("[Diagnostic] Successfully fetched models! Available models:");
+                data.models.forEach(m => console.log(`  - ${m.name}`));
+            } else if (data.error) {
+                console.log("[Diagnostic] Google API returned an error:", data.error.message);
+            } else {
+                console.log("[Diagnostic] Unknown response structure:", data);
+            }
+        } catch (err) {
+            console.error("[Diagnostic] Failed to fetch models:", err.message);
+        }
+    }
+    console.log("===========================");
+})();
