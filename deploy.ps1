@@ -9,7 +9,7 @@ Write-Host "[Step 1] Packing code files (git add .)..." -ForegroundColor Yellow
 git add .
 
 # 2. Git Commit
-$commitMsg = "fix: resolve mobile watermark display and anchor properly to bottom right corner"
+$commitMsg = "fix: restore intermediate exit disclaimer on mobile and align layout elements centered"
 Write-Host "[Step 2] Creating git commit..." -ForegroundColor Yellow
 git commit -m $commitMsg
 
