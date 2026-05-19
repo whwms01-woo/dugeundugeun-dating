@@ -176,7 +176,7 @@
         .input-control:focus {
             border-color: var(--primary);
             box-shadow: 0 0 15px rgba(255, 75, 120, 0.2);
-            background: rgba(255, 255, 255, 0.08);
+            background-color: rgba(255, 255, 255, 0.08);
         }
 
         select.input-control {
@@ -1232,13 +1232,16 @@
                 margin: 0 !important;
                 display: block !important;
                 font-size: 0.72rem !important;
-                opacity: 0.75 !important;
+                opacity: 1 !important;
                 z-index: 9999 !important;
-                background: rgba(18, 10, 36, 0.8) !important;
-                padding: 4px 10px !important;
+                background: rgba(18, 10, 36, 0.85) !important;
+                padding: 5px 12px !important;
                 border-radius: 20px !important;
-                border: 1px solid rgba(255, 255, 255, 0.05) !important;
-                backdrop-filter: blur(4px) !important;
+                border: 1px solid rgba(255, 75, 120, 0.25) !important;
+                backdrop-filter: blur(6px) !important;
+                color: #d1baff !important;
+                text-shadow: 0 0 5px rgba(209, 186, 255, 0.4) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
             }
         }
 
