@@ -72,7 +72,20 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // 1. 실시간 대화 및 호감도 평가 API
 app.post('/api/chat', async (req, res) => {
     try {
-        const { userName, userGender, userMbti, partnerMbti, scenario, history, currentMessage, currentHeartRate } = req.body;
+        const { 
+            userName, 
+            userGender, 
+            userMbti, 
+            partnerMbti, 
+            scenario, 
+            history, 
+            currentMessage, 
+            currentHeartRate,
+            partnerName,
+            partnerAge,
+            partnerJob,
+            partnerHobbies
+        } = req.body;
 
         const model = genAI.getGenerativeModel({ 
             model: "gemini-3.1-flash-lite",
@@ -83,19 +96,26 @@ app.post('/api/chat', async (req, res) => {
 
         if (!history || history.length === 0) {
             // 첫 번째 매칭 시작 시 파트너의 오프닝 대사 요청
-            prompt = `너는 소개팅 상대방인 '${partnerMbti}' 성향의 사람이야.
+            prompt = `너는 소개팅 상대방인 '${partnerName}'야. 성격과 성향은 '${partnerMbti}'형 사람이야.
+            
+            [내 프로필 정보]
+            - 내 이름: ${partnerName || '이설아'}
+            - 내 나이: ${partnerAge || '26'}세
+            - 내 직업: ${partnerJob || '일러스트레이터'}
+            - 내 취미: ${partnerHobbies || 'LP 음반 수집'}
+            - 내 성격/MBTI 성향: ${partnerMbti}
             
             [상황 정보]
-            - 내 이름(소개팅 상대방): 익명 (성격/MBTI: ${partnerMbti})
             - 상대방 정보(유저): 이름 '${userName || '익명'}', 성별 '${userGender || '상관없음'}', 성격/MBTI: ${userMbti}
             - 소개팅 장소/시나리오: ${scenario}
             
             [작성 조건]
             1. 첫 만남에서 '${partnerMbti}' 성격에 100% 빙의하여 어울리는 첫인사(오프닝 대사)를 건네줘.
-            2. MBTI 특성을 극대화하여 표현해줘. (예: ENFP는 하이텐션과 이모지 남발, INTJ는 차분하고 예의 바르지만 다소 건조한 말투, ESTP는 직진 플러팅 등)
-            3. 첫 대사인 만큼 어색하지만 어색하지 않은 척 건네는 대사로 2~3문장 이내로 작성해줘.
-            4. 속마음(innerThought)은 유저 몰래 생각하는 자신의 속마음(첫인상 느낌 등)을 1문장으로 재치 있게 적어줘.
-            5. 첫 만남이므로 호감도 변동량(heartRateChange)은 0으로 설정해줘.
+            2. 내 프로필(이름, 나이, 직업, 취미 등)의 설정 정보를 완벽히 인지하고 대화 속에 어울리게 녹여낼 수 있도록 해줘. 첫 대사에서 억지로 다 말할 필요는 없고, 자연스럽게 첫인사를 나눠줘.
+            3. MBTI 특성을 극대화하여 표현해줘. (예: ENFP는 하이텐션과 이모지 남발, INTJ는 차분하고 예의 바르지만 다소 건조한 말투, ESTP는 직진 플러팅 등)
+            4. 첫 대사인 만큼 어색하지만 어색하지 않은 척 건네는 대사로 2~3문장 이내로 작성해줘.
+            5. 속마음(innerThought)은 유저 몰래 생각하는 자신의 속마음(첫인상 느낌 등)을 1문장으로 재치 있게 적어줘.
+            6. 첫 만남이므로 호감도 변동량(heartRateChange)은 0으로 설정해줘.
             
             반드시 아래 JSON 형식으로만 답변해:
             {
@@ -105,12 +125,18 @@ app.post('/api/chat', async (req, res) => {
             }`;
         } else {
             // 대화 진행 중일 때 유저의 답변에 대한 반응 평가
-            const formattedHistory = history.map(h => `${h.sender === 'user' ? '유저' : partnerMbti + ' 파트너'}: ${h.text}`).join('\n');
+            const formattedHistory = history.map(h => `${h.sender === 'user' ? '유저(' + userName + ')' : partnerName + '(' + partnerMbti + ')'}: ${h.text}`).join('\n');
 
-            prompt = `너는 소개팅 상대방인 '${partnerMbti}' 성향의 사람이야. 유저의 새로운 말에 반응하고 호감도를 채점해줘.
+            prompt = `너는 소개팅 상대방인 '${partnerName}'야. 성향은 '${partnerMbti}'형이야. 유저의 새로운 말에 반응하고 호감도를 채점해줘.
+            
+            [내 프로필 정보 (진짜 중요 - 대화 중 나이, 직업, 취미 등을 물어보면 적극적이고 자연스럽게 답변해줘)]
+            - 내 이름: ${partnerName || '이설아'}
+            - 내 나이: ${partnerAge || '26'}세
+            - 내 직업: ${partnerJob || '일러스트레이터'}
+            - 내 취미: ${partnerHobbies || 'LP 음반 수집'}
+            - 내 성격/MBTI 성향: ${partnerMbti}
             
             [소개팅 정보]
-            - 내 성격/MBTI: ${partnerMbti}
             - 유저 정보: 이름 '${userName || '익명'}', 성별 '${userGender || '상관없음'}', 성격/MBTI: ${userMbti}
             - 소개팅 장소: ${scenario}
             - 현재 호감도(하트레이트): ${currentHeartRate}% (0~100 사이)
@@ -123,11 +149,12 @@ app.post('/api/chat', async (req, res) => {
             
             [작성 조건]
             1. 유저의 최신 말에 대해 '${partnerMbti}' 성격 특성을 200% 살려서 자연스럽게 답변(reply)해줘. 2~3문장 이내로 톡 쏘거나, 수줍어하거나, 티키타카가 되게 작성해줘.
-            2. 유저가 방금 한 말이 내 성격('${partnerMbti}') 입장에서 마음에 드는지 판단하여 호감도 변동량(heartRateChange)을 -15에서 +15 사이의 정수로 정해줘. 
+            2. 만약 유저가 나이나 직업, 취미, 이름 등에 대해 질문하거나 언급했다면, 위의 [내 프로필 정보]에 적힌 값(이름: ${partnerName}, 나이: ${partnerAge}세, 직업: ${partnerJob}, 취미: ${partnerHobbies})을 기반으로 대화하듯 매우 생생하고 자연스럽게 답해줘.
+            3. 유저가 방금 한 말이 내 성격('${partnerMbti}') 입장에서 마음에 드는지 판단하여 호감도 변동량(heartRateChange)을 -15에서 +15 사이의 정수로 정해줘. 
                - 내 MBTI 특징과 매칭이 잘 되거나 센스 있게 설레는 멘트를 던졌으면 양수(+5 ~ +15)
-               - 너무 지루하거나, 무례하거나, 내 성격 특징과 상극인 멘트(예: 계획적인 INTJ에게 무계획적인 소리 늘어놓기 등)를 했다면 음수(-5 ~ -15)
+               - 너무 지루하거나, 무례하거나, 내 성격 특징과 상극인 멘트를 했다면 음수(-5 ~ -15)
                - 평범하거나 무난하면 0에 가깝게 설정.
-            3. 속마음(innerThought)은 유저가 방금 한 말에 대한 파트너의 유쾌하고 솔직한 진짜 생각/평가를 1문장으로 나타내줘.
+            4. 속마음(innerThought)은 유저가 방금 한 말에 대한 파트너의 유쾌하고 솔직한 진짜 생각/평가를 1문장으로 나타내줘.
             
             반드시 아래 JSON 형식으로만 답변해:
             {

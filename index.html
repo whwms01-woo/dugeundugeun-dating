@@ -350,7 +350,7 @@
             transform: scale(1.08);
         }
         .avatar-circle.state-happy .partner-avatar-img {
-            filter: brightness(1.1) contrast(1.05) drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+            filter: brightness(1.15) contrast(1.05) saturate(1.15) sepia(0.08) drop-shadow(0 0 12px rgba(255, 105, 180, 0.6));
             animation: bounceExcited 0.6s ease-in-out infinite !important;
         }
 
@@ -365,7 +365,7 @@
             transform: scale(0.92);
         }
         .avatar-circle.state-sad .partner-avatar-img {
-            filter: grayscale(0.5) brightness(0.85) contrast(0.95);
+            filter: grayscale(0.65) brightness(0.8) contrast(0.95) saturate(0.8) sepia(0.1) drop-shadow(0 0 12px rgba(93, 110, 255, 0.4));
             animation: shakeDisdain 0.4s ease-in-out infinite !important;
         }
 
@@ -395,6 +395,26 @@
         .profile-info {
             text-align: center;
             margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+            text-shadow: 0 0 10px rgba(255, 75, 120, 0.3);
+        }
+
+        .profile-details {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
         }
 
         .profile-mbti-badge {
@@ -1582,6 +1602,8 @@
                         </div>
 
                         <div class="profile-info">
+                            <div id="partner-name-display" class="profile-name">이설아</div>
+                            <div id="partner-profile-details" class="profile-details">26세 · 일러스트레이터 · LP 수집</div>
                             <div id="partner-mbti-badge" class="profile-mbti-badge">INFJ</div>
                             <div id="partner-desc" class="profile-desc">소개팅 상대방</div>
                         </div>
@@ -1712,13 +1734,17 @@
         let selectedScenarioText = '☕ 어색함이 감도는 인스타 핫플 성수동 감성 카페';
         let currentHeartRate = 50;
         let dialogueTurnCount = 0;
-        let maxTurns = 5;
+        let maxTurns = 30;
         let dialogueHistory = []; // [ { sender: 'user'|'partner', text: string } ]
         
         let userName = '';
         let userGender = '';
         let userMbti = '';
         let partnerMbti = '';
+        let partnerName = '';
+        let partnerAge = 26;
+        let partnerJob = '';
+        let partnerHobbies = '';
 
         // MBTI Avatars Map
         const avatarMap = {
@@ -1754,6 +1780,44 @@
             selectedScenarioText = text;
         }
 
+        // Generate Randomized Immersive Partner Profile
+        function generatePartnerProfile(mbti, gender) {
+            const fNames = ['이설아', '박지민', '한다은', '정서윤', '윤채원', '강민서', '임지우', '송하은', '최예진', '신지원', '조지윤', '안수아'];
+            const mNames = ['이서준', '김민준', '박예준', '최도윤', '정시우', '한주원', '강하준', '윤지호', '임현우', '송준우', '신건우', '조우진'];
+            
+            partnerName = (gender === '여성') 
+                ? fNames[Math.floor(Math.random() * fNames.length)] 
+                : mNames[Math.floor(Math.random() * mNames.length)];
+                
+            partnerAge = Math.floor(Math.random() * 8) + 24; // 24 to 31
+            
+            const nfMbtis = ['ENFP', 'INFJ', 'INFP', 'ENFJ'];
+            const ntMbtis = ['INTJ', 'ENTP', 'ENTJ', 'INTP'];
+            const spMbtis = ['ESTP', 'ESFP', 'ISFP', 'ISTP'];
+            
+            if (nfMbtis.includes(mbti)) {
+                const jobs = ['플로리스트 💐', '일러스트레이터 🎨', '아동 심리 상담사 🧸', '독립 서점 대표 📚', '브랜드 디자이너 🖼️'];
+                const hobbies = ['LP 음반 수집 📻', '필름 카메라 촬영 📸', '식물 키우기 🌱', '미술관 관람 🖼️', '요가 🧘‍♀️'];
+                partnerJob = jobs[Math.floor(Math.random() * jobs.length)];
+                partnerHobbies = hobbies[Math.floor(Math.random() * hobbies.length)];
+            } else if (ntMbtis.includes(mbti)) {
+                const jobs = ['스타트업 기획자 💻', 'AI 엔지니어 🤖', '자산 운용사 분석가 📊', '건축 설계사 📐', '연구원 🔬'];
+                const hobbies = ['체스/보드게임 ♟️', '테크 가젯 수집 ⌨️', '와인 시음 🍷', '코딩 토이프로젝트 💻', '역사 인문학 독서 📚'];
+                partnerJob = jobs[Math.floor(Math.random() * jobs.length)];
+                partnerHobbies = hobbies[Math.floor(Math.random() * hobbies.length)];
+            } else if (spMbtis.includes(mbti)) {
+                const jobs = ['서핑 강사 🏄‍♂️', '바텐더 🍷', '스트릿 댄서 💃', '액티브 여행 크리에이터 ✈️', '베이커리 오너 🥐'];
+                const hobbies = ['감성 캠핑 🏕️', '스노보드 🏂', '일렉 디제잉 🎧', '주말 로드트립 🚗', '페스티벌 관람 🎸'];
+                partnerJob = jobs[Math.floor(Math.random() * jobs.length)];
+                partnerHobbies = hobbies[Math.floor(Math.random() * hobbies.length)];
+            } else { // SJ
+                const jobs = ['공인 회계사 📊', '초등학교 선생님 🎒', '대기업 마케터 💼', '공기업 주임 🏛️', '관세 대리인 🤝'];
+                const hobbies = ['가죽 공예 ✂️', '주말 등산 🏔️', '기구 필라테스 🧘', '홈쿡 요리 연구 🍳', '다이어리 꾸미기 📒'];
+                partnerJob = jobs[Math.floor(Math.random() * jobs.length)];
+                partnerHobbies = hobbies[Math.floor(Math.random() * hobbies.length)];
+            }
+        }
+
         // Start Game
         async function startDating() {
             userName = document.getElementById('user-name').value.trim();
@@ -1769,6 +1833,9 @@
 
             // Determine dynamic anime character portrait based on gender and MBTI group
             const partnerGender = (userGender === '남성') ? '여성' : (userGender === '여성' ? '남성' : '여성');
+            
+            // Generate customized immersive partner profile
+            generatePartnerProfile(partnerMbti, partnerGender);
             
             // Map 16 MBTIs to 4 major temperament groups for unique illustrations
             const nfMbtis = ['ENFP', 'INFJ', 'INFP', 'ENFJ'];
@@ -1792,6 +1859,8 @@
                 : `/assets/partner_male_${mbtiGroup}.png`;
                 
             document.getElementById('partner-avatar').innerHTML = `<img src="${partnerImgSrc}" alt="${partnerMbti}" class="partner-avatar-img">`;
+            document.getElementById('partner-name-display').innerText = partnerName;
+            document.getElementById('partner-profile-details').innerText = `${partnerAge}세 · ${partnerJob} · ${partnerHobbies}`;
             document.getElementById('partner-mbti-badge').innerText = partnerMbti;
             document.getElementById('partner-desc').innerText = descMap[partnerMbti] || '소개팅 상대방';
             document.getElementById('scenario-badge').innerText = selectedScenarioText;
@@ -1840,7 +1909,11 @@
                         scenario: selectedScenarioText,
                         history: dialogueHistory,
                         currentMessage: userMsg,
-                        currentHeartRate
+                        currentHeartRate,
+                        partnerName,
+                        partnerAge,
+                        partnerJob,
+                        partnerHobbies
                     })
                 });
 
@@ -1853,7 +1926,7 @@
 
                 // Add partner response to history and display
                 dialogueHistory.push({ sender: 'partner', text: data.reply });
-                appendMessage('partner', partnerMbti, data.reply);
+                appendMessage('partner', `${partnerName} (${partnerMbti})`, data.reply);
                 
                 // Play soft notification sound when partner speaks
                 playReceiveSound();
