@@ -1002,11 +1002,11 @@
 
         /* WATERMARK */
         .watermark {
-            position: fixed;
-            bottom: 15px;
-            right: 20px;
+            position: absolute;
+            bottom: 20px;
+            right: 24px;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.45);
             z-index: 1000;
             pointer-events: none;
             letter-spacing: 1px;
@@ -2031,9 +2031,6 @@
     <!-- Ambient blur lights -->
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
-
-    <!-- Fixed Watermark outside of cards (Saju Tarot Method) -->
-    <div class="watermark">제작자: 우경석</div>
 
     <header>
         <h1>두근두근 대작전 💖</h1>
@@ -3496,5 +3493,6 @@
             }
         }
     </script>
+    <div class="watermark">제작자: 우경석</div>
 </body>
 </html>
