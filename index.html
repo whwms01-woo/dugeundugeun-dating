@@ -1223,15 +1223,22 @@
                 height: 250px !important;
             }
             .watermark {
-                position: relative !important;
-                bottom: auto !important;
+                position: fixed !important;
+                bottom: 10px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
                 right: auto !important;
                 text-align: center !important;
-                margin-top: 15px !important;
-                margin-bottom: 10px !important;
+                margin: 0 !important;
                 display: block !important;
                 font-size: 0.72rem !important;
-                opacity: 0.65 !important;
+                opacity: 0.75 !important;
+                z-index: 9999 !important;
+                background: rgba(18, 10, 36, 0.8) !important;
+                padding: 4px 10px !important;
+                border-radius: 20px !important;
+                border: 1px solid rgba(255, 255, 255, 0.05) !important;
+                backdrop-filter: blur(4px) !important;
             }
         }
 
