@@ -1129,208 +1129,274 @@
         /* RESPONSIVE LAYOUTS */
         @media (max-width: 800px) {
             .setup-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 15px !important;
+            }
+            .input-group {
+                grid-column: span 1 !important;
+                width: 100% !important;
             }
             .scenario-container, .start-btn {
-                grid-column: span 1;
+                grid-column: span 1 !important;
+                width: 100% !important;
             }
             .scenario-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr !important; /* 2 columns for beautiful mobile alignment */
+                gap: 10px !important;
+            }
+            .scenario-card {
+                min-height: 90px !important;
+                padding: 12px !important;
             }
             .game-section {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
             }
             .profile-panel {
-                border-right: none;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                padding: 25px;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+                padding: 20px 15px !important;
+                gap: 16px !important;
+            }
+            .avatar-circle {
+                width: 85px !important;
+                height: 85px !important;
+            }
+            .profile-info {
+                margin-top: 5px !important;
+            }
+            .heart-rate-widget {
+                padding: 12px !important;
+            }
+            .thought-bubble-container {
+                padding: 10px !important;
             }
             .chat-panel {
-                height: 480px;
+                height: 480px !important;
             }
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr !important;
             }
             .ambient-glow {
-                width: 250px;
-                height: 250px;
+                width: 250px !important;
+                height: 250px !important;
+            }
+            .watermark {
+                display: none !important;
             }
         }
 
         @media (max-width: 600px) {
             header {
-                padding: 15px 10px 5px;
+                padding: 15px 10px 5px !important;
             }
             header h1 {
-                font-size: 1.8rem;
+                font-size: 1.8rem !important;
             }
             main {
-                padding: 5px;
-                align-items: flex-start;
-                width: 100%;
+                padding: 5px !important;
+                align-items: flex-start !important;
+                width: 100% !important;
             }
             .container {
-                width: 100%;
-                max-width: 100%;
-                border-radius: 16px;
-                overflow: visible;
+                width: 100% !important;
+                max-width: 100% !important;
+                border-radius: 16px !important;
+                overflow: visible !important;
             }
             .landing-section {
-                padding: 20px 15px;
+                padding: 20px 15px !important;
             }
             .dating-cover-landing {
-                margin-bottom: 20px;
-                border-radius: 12px;
-                max-width: 100%;
+                margin-bottom: 20px !important;
+                border-radius: 12px !important;
+                max-width: 100% !important;
             }
             .landing-start-btn {
-                padding: 12px 30px;
-                font-size: 1.1rem;
+                padding: 12px 30px !important;
+                font-size: 1.1rem !important;
             }
             .setup-section {
-                padding: 20px 15px;
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
+                padding: 20px 15px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .section-title {
-                font-size: 1.25rem;
-                margin-bottom: 20px;
+                font-size: 1.25rem !important;
+                margin-bottom: 20px !important;
             }
             .setup-grid {
-                gap: 15px;
-                width: 100%;
-                max-width: 100%;
+                gap: 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
             .input-group {
-                width: 100%;
-                max-width: 100%;
+                width: 100% !important;
+                max-width: 100% !important;
             }
             .input-group label {
-                font-size: 0.85rem;
-                margin-bottom: 6px;
+                font-size: 0.85rem !important;
+                margin-bottom: 6px !important;
             }
             .input-control {
-                padding: 12px 14px;
-                font-size: 0.9rem;
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
-                text-overflow: ellipsis;
+                padding: 12px 14px !important;
+                font-size: 0.9rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                text-overflow: ellipsis !important;
             }
             .scenario-container {
-                width: 100%;
-                max-width: 100%;
+                width: 100% !important;
+                max-width: 100% !important;
             }
             .scenario-grid {
-                width: 100%;
-                max-width: 100%;
+                width: 100% !important;
+                max-width: 100% !important;
+                grid-template-columns: 1fr 1fr !important; /* Keep 2 columns on small mobile */
             }
             .scenario-card {
-                padding: 12px;
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
+                padding: 10px !important;
+                min-height: 80px !important;
+            }
+            .scenario-emoji {
+                font-size: 1.5rem !important;
+            }
+            .scenario-name {
+                font-size: 0.8rem !important;
             }
             .start-btn {
-                padding: 14px;
-                font-size: 1rem;
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
+                padding: 14px !important;
+                font-size: 1rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
             .profile-panel {
-                padding: 20px 15px;
+                padding: 15px 12px !important;
+                gap: 12px !important;
             }
             .avatar-circle {
-                width: 100px;
-                height: 100px;
+                width: 75px !important;
+                height: 75px !important;
             }
-            .profile-panel {
-                padding: 20px 15px;
+            .heartbeat-element {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 0.8rem !important;
+            }
+            .profile-mbti-badge {
+                font-size: 0.95rem !important;
+                padding: 3px 12px !important;
+            }
+            .profile-desc {
+                font-size: 0.8rem !important;
+            }
+            .heart-rate-widget {
+                padding: 10px !important;
+            }
+            .sound-toggle-btn {
+                padding: 6px 12px !important;
+                font-size: 0.75rem !important;
+            }
+            .thought-bubble-container {
+                padding: 8px !important;
+            }
+            .thought-title {
+                font-size: 0.7rem !important;
+            }
+            .thought-content {
+                font-size: 0.8rem !important;
             }
             .chat-panel {
-                height: 380px;
-                width: 100%;
+                height: 380px !important;
+                width: 100% !important;
             }
             .chat-header {
-                padding: 12px 15px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 6px;
+                padding: 12px 15px !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 6px !important;
             }
             .scenario-badge {
-                white-space: normal;
-                word-break: break-all;
-                font-size: 0.75rem;
-                display: inline-flex;
-                max-width: 100%;
+                white-space: normal !important;
+                word-break: break-all !important;
+                font-size: 0.75rem !important;
+                display: inline-flex !important;
+                max-width: 100% !important;
             }
             .chat-body {
-                padding: 15px;
+                padding: 15px !important;
             }
             .chat-footer {
-                padding: 12px 10px;
-                gap: 8px;
+                padding: 12px 10px !important;
+                gap: 8px !important;
             }
             .chat-input {
-                padding: 10px 12px;
-                font-size: 0.9rem;
-                min-width: 0;
-                width: 0;
-                flex-grow: 1;
+                padding: 10px 12px !important;
+                font-size: 0.9rem !important;
+                min-width: 0 !important;
+                width: 0 !important;
+                flex-grow: 1 !important;
             }
             .send-btn {
-                padding: 10px 14px;
-                font-size: 0.9rem;
-                flex-shrink: 0;
+                padding: 10px 14px !important;
+                font-size: 0.9rem !important;
+                flex-shrink: 0 !important;
             }
             .message-bubble {
-                word-break: break-word;
+                word-break: break-word !important;
+                font-size: 0.88rem !important;
+                padding: 10px 14px !important;
             }
-
-            /* SECTION 3: Mobile Result view */
             .result-section {
-                padding: 20px 15px;
+                padding: 20px 15px !important;
             }
             .result-badge {
-                font-size: 0.95rem;
-                padding: 8px 22px;
-                border-width: 1.5px;
-                margin-bottom: 22px;
-                border-radius: 30px;
-                line-height: 1.2;
+                font-size: 0.95rem !important;
+                padding: 8px 22px !important;
+                border-width: 1.5px !important;
+                margin-bottom: 22px !important;
+                border-radius: 30px !important;
+                line-height: 1.2 !important;
             }
             .stat-card {
-                padding: 15px;
-                gap: 8px;
+                padding: 15px !important;
+                gap: 8px !important;
             }
             .stat-circle-box {
-                transform: scale(0.9);
-                margin: -5px 0;
+                transform: scale(0.9) !important;
+                margin: -5px 0 !important;
             }
             .feedback-card {
-                padding: 20px 15px;
-                gap: 16px;
+                padding: 20px 15px !important;
+                gap: 16px !important;
             }
             .feedback-text {
-                font-size: 0.92rem;
-                line-height: 1.65;
-                color: #eae3f2;
-                letter-spacing: 0.3px;
+                font-size: 0.92rem !important;
+                line-height: 1.65 !important;
+                color: #eae3f2 !important;
+                letter-spacing: 0.3px !important;
             }
             .prediction-block {
-                padding: 12px 14px;
+                padding: 12px 14px !important;
             }
             .prediction-text {
-                font-size: 0.88rem;
-                line-height: 1.6;
+                font-size: 0.88rem !important;
+                line-height: 1.6 !important;
             }
             .reset-btn {
-                width: 100%;
-                max-width: 250px;
-                padding: 12px 30px;
-                font-size: 0.95rem;
+                width: 100% !important;
+                max-width: 250px !important;
+                padding: 12px 30px !important;
+                font-size: 0.95rem !important;
+            }
+            .watermark {
+                display: none !important;
             }
         }
 
