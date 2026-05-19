@@ -120,6 +120,7 @@
             border-radius: 24px;
             overflow: hidden;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; /* Position relative for the watermark (Idea 5) */
         }
 
         /* SECTION: 1. Setup Form */
@@ -1002,11 +1003,11 @@
 
         /* WATERMARK */
         .watermark {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
+            position: absolute;
+            bottom: 12px;
+            right: 18px;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.35);
+            color: rgba(255, 255, 255, 0.25);
             font-weight: 700;
             pointer-events: none;
             letter-spacing: 0.5px;
@@ -1273,8 +1274,8 @@
                 height: 250px !important;
             }
             .watermark {
-                position: fixed !important;
-                bottom: 12px !important; /* Positioned right near the bottom end edge */
+                position: absolute !important;
+                bottom: 8px !important; /* Locks perfectly at the bottom corner of the card */
                 right: 12px !important;
                 left: auto !important;
                 transform: none !important;
@@ -1283,14 +1284,14 @@
                 display: block !important;
                 font-size: 0.65rem !important;
                 opacity: 0.35 !important; /* Faint and subtle as requested */
-                z-index: 10000000 !important; /* High layer priority to remain on top */
+                z-index: 10000 !important;
                 background: transparent !important;
                 padding: 0 !important;
                 border-radius: 0 !important;
                 border: none !important;
                 backdrop-filter: none !important;
                 -webkit-backdrop-filter: none !important;
-                color: rgba(255, 255, 255, 0.35) !important;
+                color: rgba(255, 255, 255, 0.3) !important;
                 text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
                 box-shadow: none !important;
                 pointer-events: none !important;
@@ -2322,11 +2323,10 @@
                 <button class="reset-btn" onclick="resetGame()">처음으로 가기</button>
             </div>
 
+            <!-- Watermark inside container for absolute, rock-solid visibility -->
+            <div class="watermark">제작자: 우경석</div>
         </div>
     </main>
-
-    <!-- Watermark -->
-    <div class="watermark">제작자: 우경석</div>
 
     <!-- PREMIUM PROFILE IMAGE ZOOM VIEWER -->
     <div id="profile-image-modal" class="profile-image-modal" onclick="closeProfileModal()">
