@@ -170,7 +170,7 @@ app.post('/api/chat', async (req, res) => {
         } = req.body;
 
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-3.1-flash-lite",
+            model: "gemini-1.5-flash",
             generationConfig: { responseMimeType: "application/json" }
         });
 
@@ -260,7 +260,7 @@ app.post('/api/result', async (req, res) => {
         const { userName, userMbti, partnerMbti, scenario, history, finalHeartRate, isEarly } = req.body;
 
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-3.1-flash-lite",
+            model: "gemini-1.5-flash",
             generationConfig: { responseMimeType: "application/json" }
         });
 

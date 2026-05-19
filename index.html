@@ -2749,7 +2749,19 @@
             
             modalName.innerText = partnerName || '소개팅 상대방';
             modalMbti.innerText = partnerMbti || 'INFJ';
-            modalDetails.innerText = `${partnerAge || 26}세 · ${partnerJob || '일러스트레이터'}`;
+            
+            // Rich descriptive labels for age, job, and hobbies with elegant color highlights
+            modalDetails.innerHTML = `
+                <span style="color: #a69bb8; font-weight: 500; font-size: 0.85rem;">나이:</span> 
+                <span style="color: #00f2fe; font-weight: 700;">${partnerAge || 26}세</span> 
+                &nbsp;&nbsp;&nbsp;
+                <span style="color: #a69bb8; font-weight: 500; font-size: 0.85rem;">직업:</span> 
+                <span style="color: #00f2fe; font-weight: 700;">${partnerJob || '일러스트레이터'}</span> 
+                &nbsp;&nbsp;&nbsp;
+                <span style="color: #a69bb8; font-weight: 500; font-size: 0.85rem;">취미:</span> 
+                <span style="color: #00f2fe; font-weight: 700;">${partnerHobbies || 'LP 수집'}</span>
+            `;
+            
             modalDesc.innerText = `"${descMap[partnerMbti] || '당신과의 진솔한 매칭을 기다리는 중...'}"`;
             
             modal.style.display = 'flex';
