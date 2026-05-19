@@ -109,7 +109,7 @@ git add .
 
 echo.
 echo [Step 3] 로컬 배포 커밋 생성 중 (git commit)...
-git commit -m "fix: restore intermediate exit disclaimer on mobile and align layout elements centered"
+git commit -m "feat: implement realistic 0% heart rate rage-quit system and reciprocal persona interaction"
 
 echo.
 echo [Step 4] 실서버 라이브 전송 중 (git push origin main)...

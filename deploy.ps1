@@ -9,7 +9,7 @@ Write-Host "[Step 1] Packing code files (git add .)..." -ForegroundColor Yellow
 git add .
 
 # 2. Git Commit
-$commitMsg = "fix: restore intermediate exit disclaimer on mobile and align layout elements centered"
+$commitMsg = "feat: implement realistic 0% heart rate rage-quit system and reciprocal persona interaction"
 Write-Host "[Step 2] Creating git commit..." -ForegroundColor Yellow
 git commit -m $commitMsg
 

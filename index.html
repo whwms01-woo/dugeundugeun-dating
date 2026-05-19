@@ -1994,6 +1994,19 @@
                 opacity: 0;
             }
         }
+        
+        @keyframes cameraShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-5px, -3px) rotate(-1deg); }
+            20% { transform: translate(-4px, 1px) rotate(1.5deg); }
+            30% { transform: translate(4px, 3px) rotate(0deg); }
+            40% { transform: translate(2px, -2px) rotate(1deg); }
+            50% { transform: translate(-2px, 3px) rotate(-1.5deg); }
+            60% { transform: translate(-4px, 2px) rotate(0deg); }
+            70% { transform: translate(3px, 2px) rotate(-1deg); }
+            80% { transform: translate(-2px, -2px) rotate(1.5deg); }
+            90% { transform: translate(4px, 3px) rotate(0deg); }
+        }
     </style>
 </head>
 <body>
@@ -2559,7 +2572,54 @@
                     dialogueTurnCount++;
                     document.getElementById('progress-indicator').innerText = `대화 진행: ${dialogueTurnCount} / ${maxTurns}`;
 
-                    // If reached 5 turns, trigger result report card
+                    // Check if Heart Rate reaches 0% -> Forced Early Exit Game Over!
+                    if (currentHeartRate <= 0) {
+                        // 1. Lock the chat input to block further messages
+                        const chatInputEl = document.getElementById('chat-input');
+                        chatInputEl.disabled = true;
+                        chatInputEl.placeholder = "상대방이 정색하고 자리를 박차고 나갔습니다...";
+                        const sendBtnEl = document.querySelector('.send-btn');
+                        if (sendBtnEl) sendBtnEl.disabled = true;
+
+                        // 2. Play critical failure sound
+                        playFailSound();
+
+                        // 3. Append last dramatic angry exit warning bubble
+                        setTimeout(() => {
+                            let angryReply = `"(정색하며 가방을 챙겨 벌떡 일어나며) 더는 못 참겠네요. 진짜 매너가 기본도 안 되어 있으시군요. 죄송한데 저 먼저 일어날게요. 다시는 연락하지 마세요!"`;
+                            if (partnerMbti === 'INFJ' || partnerMbti === 'INFP') {
+                                angryReply = `"(차가운 눈빛으로 가방을 챙기며) ...아, 정말 불쾌하네요. 더는 시간 낭비하고 싶지 않아요. 저 먼저 갈 테니 남은 건 알아서 계산해 주세요."`;
+                            } else if (partnerMbti === 'INTJ' || partnerMbti === 'ISTP') {
+                                angryReply = `"(한숨을 쉬고 겉옷을 입으며) 더 이상 시간 아까워서 앉아 있을 수가 없네요. 무례한 사람하곤 1초도 더 대화 안 합니다. 다신 연락 주지 마세요."`;
+                            } else if (partnerMbti === 'ESTP' || partnerMbti === 'ENTP') {
+                                angryReply = `"(어이없다는 듯 실소를 터트리며) 와, 진짜 대박이네. 나 참 어처구니가 없어서... 야, 너 나한테 평생 장난치고 살아라! 나 먼저 간다, 수고!"`;
+                            }
+                            
+                            appendMessage('partner', `🚨 ${partnerName} (퇴장)`, angryReply);
+                            
+                            // Immersive dynamic red flash and shake feedback
+                            document.body.style.animation = 'cameraShake 0.8s ease-in-out';
+                            document.body.style.border = '4px solid #ff4b78';
+                            
+                            setTimeout(() => {
+                                document.body.style.animation = '';
+                                document.body.style.border = 'none';
+                            }, 800);
+                        }, 800);
+
+                        // 4. Force intermediate report card generation after 4.5 seconds
+                        setTimeout(() => {
+                            chatInputEl.disabled = false;
+                            chatInputEl.placeholder = "대화를 입력해주세요...";
+                            if (sendBtnEl) sendBtnEl.disabled = false;
+                            
+                            finishDating(true); // isEarly = true
+                        }, 4500);
+
+                        return;
+                    }
+
+                    // If reached max turns, trigger result report card
                     if (dialogueTurnCount >= maxTurns) {
                         setTimeout(finishDating, 2000);
                     }
