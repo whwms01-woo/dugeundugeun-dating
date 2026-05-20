@@ -2824,10 +2824,13 @@
             const errorId = `err-${Date.now()}`;
             msgEl.id = errorId;
             
+            // Safe fallback for empty message (such as the opening greeting message)
+            const safeMsg = (lastUserMsg || '').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+            
             msgEl.innerHTML = `
                 <div class="message-bubble">
                     <span>${text}</span>
-                    ${lastUserMsg ? `<button class="retry-btn" onclick="retryLastMessage('${errorId}', \`${lastUserMsg.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">다시 시도하기 🔄</button>` : ''}
+                    <button class="retry-btn" onclick="retryLastMessage('${errorId}', \`${safeMsg}\`)">다시 시도하기 🔄</button>
                 </div>
             `;
             
@@ -2850,8 +2853,9 @@
             const sendBtn = document.querySelector('.send-btn');
             if (sendBtn) sendBtn.disabled = true;
             
-            // Retry fetching chat
-            await fetchNextChat(false, lastUserMsg);
+            // Retry fetching chat (If no history exists, it was the opening message!)
+            const isOpening = (dialogueHistory.length === 0);
+            await fetchNextChat(isOpening, lastUserMsg);
         }
 
         // Update Heart Rate Progress Bar and animation delta
