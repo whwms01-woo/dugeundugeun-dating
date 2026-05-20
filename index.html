@@ -729,6 +729,55 @@
             box-shadow: 0 4px 15px rgba(255, 75, 120, 0.2);
         }
 
+        /* System warning error bubble styling */
+        .message.system-error {
+            align-self: center !important;
+            max-width: 90% !important;
+            margin: 12px 0 !important;
+            text-align: center;
+        }
+
+        .message.system-error .message-bubble {
+            background: rgba(255, 107, 107, 0.08) !important;
+            border: 1px dashed rgba(255, 107, 107, 0.35) !important;
+            color: #ffa8a8 !important;
+            border-radius: 16px !important;
+            border-top-left-radius: 16px !important;
+            border-top-right-radius: 16px !important;
+            padding: 14px 20px !important;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.05) !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #d82b6b 50%, var(--secondary) 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 75, 120, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(255, 75, 120, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .retry-btn:active {
+            transform: translateY(1px);
+        }
+
         /* Typing indicator */
         .typing-loader {
             display: none;
@@ -2549,6 +2598,12 @@
             loader.style.display = 'block';
             loader.scrollIntoView({ behavior: 'smooth' });
 
+            // Disable input and send button to prevent spamming
+            const chatInputEl = document.getElementById('chat-input');
+            chatInputEl.disabled = true;
+            const sendBtnEl = document.querySelector('.send-btn');
+            if (sendBtnEl) sendBtnEl.disabled = true;
+
             try {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
@@ -2600,9 +2655,7 @@
                     // Check if Heart Rate reaches 0% -> Forced Early Exit Game Over!
                     if (currentHeartRate <= 0) {
                         // 1. Lock the chat input to block further messages
-                        const chatInputEl = document.getElementById('chat-input');
                         chatInputEl.disabled = true;
-                        const sendBtnEl = document.querySelector('.send-btn');
                         if (sendBtnEl) sendBtnEl.disabled = true;
  
                         // 2. Play critical failure sound
@@ -2675,13 +2728,33 @@
                     // If reached max turns, trigger result report card
                     if (dialogueTurnCount >= maxTurns) {
                         setTimeout(finishDating, 2000);
+                        return; // return early, keep input disabled
                     }
                 }
+
+                // Success: Re-enable input and send button!
+                chatInputEl.disabled = false;
+                if (sendBtnEl) sendBtnEl.disabled = false;
+                chatInputEl.focus();
 
             } catch (error) {
                 console.error(error);
                 loader.style.display = 'none';
-                alert(`소개팅 상대와 통신 중 장애가 발생했습니다.\n\n[오류 상세 정보]\n${error.message}`);
+                
+                // Re-enable inputs on failure so user can try again!
+                chatInputEl.disabled = false;
+                if (sendBtnEl) sendBtnEl.disabled = false;
+                
+                // Format a highly customized and user-friendly error message based on the status code/type
+                let friendlyMsg = error.message;
+                if (friendlyMsg.includes('429') || friendlyMsg.toLowerCase().includes('quota') || friendlyMsg.toLowerCase().includes('limit')) {
+                    friendlyMsg = "⚠️ [AI 대화량 한도 도달] 현재 무료 체험 API 호출 한도(429 Rate Limit)를 순간 초과했습니다! 약 15~30초간 머리를 식히신 뒤, 아래 '다시 시도하기' 버튼을 눌러주시면 대화가 정상적으로 이어집니다. 💖";
+                } else {
+                    friendlyMsg = `⚠️ [소개팅 연결 지연] 대화 전송 중 통신 불안정이 감지되었습니다. 아래 '다시 시도하기' 버튼을 클릭해 대화를 재전송해 주세요! (${error.message})`;
+                }
+                
+                // Append beautiful system error warning instead of standard blocking alert()!
+                appendSystemErrorMessage(friendlyMsg, userMsg);
             }
         }
 
@@ -2689,7 +2762,7 @@
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
-            if (!msg) return;
+            if (!input || input.disabled || !msg) return; // Prevent double sends if input is already disabled!
 
             // Clear input
             input.value = '';
@@ -2697,6 +2770,11 @@
             // Add user message to history and display
             dialogueHistory.push({ sender: 'user', text: msg });
             appendMessage('user', '나', msg);
+
+            // Disable input and send button immediately to prevent spamming
+            input.disabled = true;
+            const sendBtn = document.querySelector('.send-btn');
+            if (sendBtn) sendBtn.disabled = true;
 
             // Trigger Easter Egg if message contains special romantic words
             const romanticKeywords = ['사귈래', '고백', '좋아해', '이쁘다', '예쁘다', '멋있다', '설렌다', '심쿵', '사랑해', '데이트', '보고싶어'];
@@ -2734,6 +2812,46 @@
             const loader = document.getElementById('typing-loader');
             chatBody.insertBefore(msgEl, loader);
             chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Append system warning error message bubble to chat box with retry button
+        function appendSystemErrorMessage(text, lastUserMsg) {
+            const chatBody = document.getElementById('chat-body');
+            const msgEl = document.createElement('div');
+            msgEl.className = `message system-error`;
+            
+            // Generate clean unique ID for the retry container so we can remove it on retry
+            const errorId = `err-${Date.now()}`;
+            msgEl.id = errorId;
+            
+            msgEl.innerHTML = `
+                <div class="message-bubble">
+                    <span>${text}</span>
+                    ${lastUserMsg ? `<button class="retry-btn" onclick="retryLastMessage('${errorId}', \`${lastUserMsg.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">다시 시도하기 🔄</button>` : ''}
+                </div>
+            `;
+            
+            const loader = document.getElementById('typing-loader');
+            chatBody.insertBefore(msgEl, loader);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // Retry sending the last user message
+        async function retryLastMessage(errorBubbleId, lastUserMsg) {
+            // Remove the error bubble from chat body
+            const errorEl = document.getElementById(errorBubbleId);
+            if (errorEl) {
+                errorEl.remove();
+            }
+            
+            // Re-disable inputs
+            const input = document.getElementById('chat-input');
+            input.disabled = true;
+            const sendBtn = document.querySelector('.send-btn');
+            if (sendBtn) sendBtn.disabled = true;
+            
+            // Retry fetching chat
+            await fetchNextChat(false, lastUserMsg);
         }
 
         // Update Heart Rate Progress Bar and animation delta

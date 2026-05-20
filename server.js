@@ -125,8 +125,9 @@ app.get('/assets/:filename', (req, res) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction (회복력 극대화)
-async function generateGeminiContentWithRetry(prompt, retries = 1) {
-    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-1.5-flash", "gemini-1.5-flash-latest"];
+async function generateGeminiContentWithRetry(prompt, retries = 2) {
+    // Clean list of valid Google AI Studio models (removing invalid ones like gemini-flash-latest)
+    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
     const errors = [];
 
     for (const modelName of models) {
@@ -155,12 +156,23 @@ async function generateGeminiContentWithRetry(prompt, retries = 1) {
                 console.log(`[Gemini] Successfully generated and parsed content using model: ${modelName}!`);
                 return jsonResult;
             } catch (err) {
-                console.error(`[Gemini] Model ${modelName} (Attempt ${attempt}) failed:`, err.message);
-                errors.push(`${modelName} (Attempt ${attempt}): ${err.message}`);
+                // Sanitize the error message to avoid flooding the response with huge JSON payloads
+                let cleanErrorMessage = err.message;
+                if (cleanErrorMessage.includes('[429 Too Many Requests]')) {
+                    cleanErrorMessage = '429 Too Many Requests (API Rate Limit Exceeded)';
+                } else if (cleanErrorMessage.length > 150) {
+                    cleanErrorMessage = cleanErrorMessage.substring(0, 150) + '...';
+                }
+                
+                console.error(`[Gemini] Model ${modelName} (Attempt ${attempt}) failed:`, cleanErrorMessage);
+                errors.push(`${modelName} (Attempt ${attempt}): ${cleanErrorMessage}`);
                 
                 if (attempt <= retries) {
-                    // 500ms delay before retry
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    // Exponential backoff if it's a rate limit error (429 or Quota exceeded)
+                    const isRateLimit = err.message.includes('429') || err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('limit');
+                    const delay = isRateLimit ? (2000 * attempt) : 500;
+                    console.log(`[Gemini] Waiting ${delay}ms before next retry attempt...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
         }
