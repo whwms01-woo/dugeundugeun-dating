@@ -835,6 +835,27 @@
             box-shadow: 0 0 15px rgba(144, 97, 255, 0.15);
         }
 
+        .gift-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 75, 120, 0.4);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.4rem;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 75, 120, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gift-btn:hover {
+            background: rgba(255, 75, 120, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 75, 120, 0.3);
+        }
+
         .send-btn {
             background: var(--secondary);
             border: none;
@@ -1656,6 +1677,11 @@
                 padding: 12px 10px !important;
                 gap: 8px !important;
             }
+            .gift-btn {
+                padding: 10px !important;
+                font-size: 1.2rem !important;
+                border-radius: 10px !important;
+            }
             .chat-input {
                 padding: 10px 12px !important;
                 font-size: 0.9rem !important;
@@ -2303,6 +2329,7 @@
                     </div>
 
                     <div class="chat-footer">
+                        <button class="gift-btn" id="gift-btn" onclick="openGiftModal()" title="궁극기: 위기 탈출 선물하기 (1회 제한)">🎁</button>
                         <input type="text" id="chat-input" class="chat-input" placeholder="대화를 입력해주세요..." onkeydown="if(event.key === 'Enter') sendMessage()">
                         <button class="send-btn" onclick="sendMessage()">
                             <span>전송</span>
@@ -2397,6 +2424,33 @@
         </div>
     </div>
 
+    <!-- GIFT MODAL -->
+    <div id="gift-modal" class="real-mind-modal" onclick="closeGiftModal()">
+        <div class="real-mind-modal-content" onclick="event.stopPropagation()" style="max-width: 450px;">
+            <button class="real-mind-modal-close" onclick="closeGiftModal()">✕</button>
+            <div class="real-mind-modal-header" style="background: linear-gradient(90deg, #ff9f43, #ff4b78);">
+                <h3>🎁 위기 탈출 선물하기 (1회 제한)</h3>
+            </div>
+            
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px; background: rgba(18, 10, 36, 0.95); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+                <p style="font-size: 0.85rem; color: #a69bb8; text-align: center;">상대방의 취향에 맞는 선물을 골라 진심을 전해보세요.</p>
+                
+                <select id="gift-select" class="input-control" style="width: 100%; border-color: rgba(255, 75, 120, 0.4); background-color: rgba(0,0,0,0.3);">
+                    <option value="" disabled selected>어떤 선물을 건네실 건가요?</option>
+                    <option value="🍰 디저트 카페 수제 마카롱 세트">🍰 디저트 카페 수제 마카롱 세트 (달콤함)</option>
+                    <option value="🌷 로맨틱한 미니 꽃다발 한 송이">🌷 로맨틱한 미니 꽃다발 한 송이 (감성)</option>
+                    <option value="🧴 백화점 브랜드 미니 핸드크림">🧴 백화점 브랜드 미니 핸드크림 (실용성)</option>
+                    <option value="🎫 핫한 전시회/영화 예매권 2장">🎫 핫한 전시회/영화 예매권 2장 (애프터)</option>
+                    <option value="💊 센스 만점 숙취해소제와 비타민">💊 센스 만점 숙취해소제와 비타민 (유쾌함)</option>
+                </select>
+
+                <textarea id="gift-message" class="input-control" rows="3" placeholder="선물과 함께 건넬 진정성 있는 멘트를 20자 이상 꽉 채워 적어주세요. (예: 아까 제 말이 너무 심했죠, 오다 주웠습니다.)" style="resize: none; width: 100%; box-sizing: border-box; border-color: rgba(144, 97, 255, 0.4); background-color: rgba(0,0,0,0.3); font-size: 0.9rem; padding: 15px;"></textarea>
+
+                <button class="start-btn" onclick="sendGift()" style="margin-top: 5px; padding: 14px; width: 100%;">선물 건네며 말하기 💖</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State variables
         let selectedScenarioText = '☕ 어색함이 감도는 인스타 핫플 성수동 감성 카페';
@@ -2413,6 +2467,49 @@
         let partnerAge = 26;
         let partnerJob = '';
         let partnerHobbies = '';
+        let giftUsed = false;
+
+        function openGiftModal() {
+            if (giftUsed) {
+                alert("선물(궁극기)은 한 번의 데이트에서 딱 1번만 사용할 수 있습니다! 😅");
+                return;
+            }
+            document.getElementById('gift-modal').classList.add('show');
+        }
+
+        function closeGiftModal() {
+            document.getElementById('gift-modal').classList.remove('show');
+        }
+
+        async function sendGift() {
+            const giftVal = document.getElementById('gift-select').value;
+            const giftMsg = document.getElementById('gift-message').value.trim();
+
+            if (!giftVal) {
+                alert("건넬 선물을 선택해주세요! 🎁");
+                return;
+            }
+            if (giftMsg.length < 20) {
+                alert("선물의 진정성을 위해 멘트를 20자 이상 꽉 채워 적어주세요! 💦");
+                return;
+            }
+
+            closeGiftModal();
+            giftUsed = true;
+            
+            // Disable gift button
+            const giftBtn = document.getElementById('gift-btn');
+            giftBtn.style.opacity = '0.3';
+            giftBtn.style.cursor = 'not-allowed';
+            giftBtn.onclick = null;
+            
+            const formattedMessage = `[🎁 선물 전달: ${giftVal}] (선물을 건네며) ${giftMsg}`;
+            
+            // Re-use existing send message logic for history & UI
+            const input = document.getElementById('chat-input');
+            input.value = formattedMessage;
+            await sendMessage();
+        }
 
         // MBTI Avatars Map
         const avatarMap = {
@@ -3041,6 +3138,15 @@
             dialogueTurnCount = 0;
             dialogueHistory = [];
             currentHeartRate = 50;
+            giftUsed = false;
+            
+            // Re-enable gift button
+            const giftBtn = document.getElementById('gift-btn');
+            if (giftBtn) {
+                giftBtn.style.opacity = '1';
+                giftBtn.style.cursor = 'pointer';
+                giftBtn.onclick = openGiftModal;
+            }
             
             // Stop ambient music engine (Idea 2)
             stopBgmEngine();

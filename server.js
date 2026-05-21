@@ -125,19 +125,43 @@ app.get('/assets/:filename', (req, res) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction (회복력 극대화)
+// 🚀 속도 최적화: gemini-2.0-flash 1순위, 2.5-flash는 Thinking 완전 비활성화
 async function generateGeminiContentWithRetry(prompt, retries = 2) {
-    // Clean list of valid Google AI Studio models (removing invalid ones like gemini-flash-latest)
-    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+    // 모델 설정: 속도 우선 순서 (2.0-flash가 가장 빠름)
+    const modelConfigs = [
+        { 
+            name: "gemini-2.0-flash", 
+            config: { responseMimeType: "application/json" }
+        },
+        { 
+            name: "gemini-1.5-flash", 
+            config: { responseMimeType: "application/json" }
+        },
+        { 
+            // 2.5-flash는 Thinking 완전 비활성화하여 속도 개선
+            name: "gemini-2.5-flash", 
+            config: { responseMimeType: "application/json" },
+            thinkingConfig: { thinkingBudget: 0 }
+        }
+    ];
     const errors = [];
 
-    for (const modelName of models) {
+    for (const modelCfg of modelConfigs) {
         for (let attempt = 1; attempt <= retries + 1; attempt++) {
             try {
-                console.log(`[Gemini] Attempting generation with model: ${modelName} (Attempt ${attempt})...`);
-                const model = genAI.getGenerativeModel({ 
-                    model: modelName,
-                    generationConfig: { responseMimeType: "application/json" }
-                });
+                console.log(`[Gemini] Attempting generation with model: ${modelCfg.name} (Attempt ${attempt})...`);
+                const modelOptions = { 
+                    model: modelCfg.name,
+                    generationConfig: modelCfg.config
+                };
+                // 2.5-flash의 경우 Thinking 비활성화 적용
+                if (modelCfg.thinkingConfig) {
+                    modelOptions.generationConfig = {
+                        ...modelCfg.config,
+                        ...modelCfg.thinkingConfig
+                    };
+                }
+                const model = genAI.getGenerativeModel(modelOptions);
                 const result = await model.generateContent(prompt);
                 const response = await result.response;
                 let text = response.text().trim();
@@ -153,23 +177,22 @@ async function generateGeminiContentWithRetry(prompt, retries = 2) {
                 }
                 
                 const jsonResult = JSON.parse(text);
-                console.log(`[Gemini] Successfully generated and parsed content using model: ${modelName}!`);
+                console.log(`[Gemini] Successfully generated and parsed content using model: ${modelCfg.name}!`);
                 return jsonResult;
             } catch (err) {
-                // Sanitize the error message to avoid flooding the response with huge JSON payloads
                 let cleanErrorMessage = err.message;
-                if (cleanErrorMessage.includes('[429 Too Many Requests]')) {
-                    cleanErrorMessage = '429 Too Many Requests (API Rate Limit Exceeded)';
+                const isRateLimit = cleanErrorMessage.includes('429') || cleanErrorMessage.toLowerCase().includes('quota') || cleanErrorMessage.toLowerCase().includes('limit') || cleanErrorMessage.toLowerCase().includes('exhausted');
+                
+                if (isRateLimit) {
+                    cleanErrorMessage = '429 Too Many Requests (RPM Limit Exceeded: 약 15초 후 다시 시도해 주세요.)';
                 } else if (cleanErrorMessage.length > 150) {
                     cleanErrorMessage = cleanErrorMessage.substring(0, 150) + '...';
                 }
                 
-                console.error(`[Gemini] Model ${modelName} (Attempt ${attempt}) failed:`, cleanErrorMessage);
-                errors.push(`${modelName} (Attempt ${attempt}): ${cleanErrorMessage}`);
+                console.error(`[Gemini] Model ${modelCfg.name} (Attempt ${attempt}) failed:`, cleanErrorMessage);
+                errors.push(`${modelCfg.name} (Attempt ${attempt}): ${cleanErrorMessage}`);
                 
                 if (attempt <= retries) {
-                    // Exponential backoff if it's a rate limit error (429 or Quota exceeded)
-                    const isRateLimit = err.message.includes('429') || err.message.toLowerCase().includes('quota') || err.message.toLowerCase().includes('limit');
                     const delay = isRateLimit ? (2000 * attempt) : 500;
                     console.log(`[Gemini] Waiting ${delay}ms before next retry attempt...`);
                     await new Promise(resolve => setTimeout(resolve, delay));
@@ -203,77 +226,79 @@ app.post('/api/chat', async (req, res) => {
 
         let prompt = "";
 
+        // MBTI별 소개팅 질문 스타일 정의 (자연스러운 정보 탐색 패턴)
+        const mbtiQuestionStyle = {
+            'ENFP': '밝고 신나는 톤으로 "어머 저도 궁금한데요!" 스타일로 연속 질문 폭격',
+            'ENTP': '지적 호기심 가득한 "오, 그럼 혹시~?" 스타일의 꼬리 물기 질문',
+            'ENFJ': '따뜻하고 배려 깊게 "요즘 어떻게 지내세요?" 스타일로 일상 깊이 파고들기',
+            'ENTJ': '직접적으로 "그래서 직업은요? 꿈은요?" 효율적 정보 수집 스타일',
+            'INFP': '조심스럽고 감성적으로 "...혹시 여쭤봐도 될까요?" 스타일의 수줍은 질문',
+            'INTP': '분석적으로 "흥미롭네요. 그럼 보통 주말엔 뭐 하세요?" 관찰자 스타일',
+            'INFJ': '깊이 있게 "그 일 하면서 어떤 게 가장 보람차세요?" 본질 탐구 스타일',
+            'INTJ': '효율적이고 차분하게 "직업이나 관심사는 어떻게 되시나요?" 단도직입형',
+            'ESFP': '신나고 활발하게 "어머 진짜요?! 어디서요?! 저도!" 공감 폭발 스타일',
+            'ESTP': '직진으로 "몇 살이에요? 뭐 해요?" 쿨하고 직접적인 스타일',
+            'ESFJ': '다정하게 "가족은 어떻게 되세요? 사는 동네는요?" 생활밀착형 질문',
+            'ESTJ': '체계적으로 "직업, 사는 곳, 취미 순서로 알고 싶어요" 정리형',
+            'ISFP': '조용히 "...취미가 뭐예요? 저도 좀 알고 싶어서요" 소근소근 스타일',
+            'ISTP': '무뚝뚝하지만 진심으로 "뭐 좋아해요?" 쿨한 직구형',
+            'ISFJ': '배려 깊게 "불편한 건 없으세요? 어디서 오셨어요?" 섬세한 관심형',
+            'ISTJ': '신중하게 "실례가 안 된다면 직업이 어떻게 되세요?" 예의 바른 정보형'
+        };
+        const questionStyle = mbtiQuestionStyle[partnerMbti] || '자연스럽고 친근하게';
+
+        // 아직 물어보지 않은 정보 추적 (최근 5턴 기록만 사용)
+        const recentHistory = history ? history.slice(-5) : [];
+        const historyText = recentHistory.map(h => `${h.sender === 'user' ? '유저(' + userName + ')' : partnerName}: ${h.text}`).join('\n');
+        const alreadyAsked = historyText.toLowerCase();
+        const needToAsk = [];
+        if (!alreadyAsked.includes('직업') && !alreadyAsked.includes('일 하')) needToAsk.push('직업/하는 일');
+        if (!alreadyAsked.includes('취미') && !alreadyAsked.includes('주말')) needToAsk.push('취미/주말 생활');
+        if (!alreadyAsked.includes('사는') && !alreadyAsked.includes('동네') && !alreadyAsked.includes('어디')) needToAsk.push('사는 곳/동네');
+        if (!alreadyAsked.includes('나이') && !alreadyAsked.includes('살')) needToAsk.push('나이');
+
         if (!history || history.length === 0) {
             // 첫 번째 매칭 시작 시 파트너의 오프닝 대사 요청
-            prompt = `너는 소개팅 상대방인 '${partnerName}'야. 성격과 성향은 '${partnerMbti}'형 사람이야.
+            prompt = `너는 소개팅 상대방 '${partnerName}'(${partnerMbti})야.
+            내 정보: 이름 ${partnerName}, ${partnerAge}세, 직업 ${partnerJob || '일러스트레이터'}, 취미 ${partnerHobbies || 'LP 음반 수집'}.
+            상대(유저): 이름 ${userName || '익명'}, 성별 ${userGender || '미상'}, MBTI ${userMbti}.
+            장소: ${scenario}.
             
-            [내 프로필 정보]
-            - 내 이름: ${partnerName || '이설아'}
-            - 내 나이: ${partnerAge || '26'}세
-            - 내 직업: ${partnerJob || '일러스트레이터'}
-            - 내 취미: ${partnerHobbies || 'LP 음반 수집'}
-            - 내 성격/MBTI 성향: ${partnerMbti}
+            [첫인사 조건]
+            - ${partnerMbti} 성격 100% 살린 2~3문장의 자연스러운 첫인사.
+            - 억지스럽지 않게 상대에게 이름이나 한 가지만 살짝 물어봐도 좋아.
+            - MBTI별 말투 극대화 (ENFP=하이텐션이모지, INTJ=차분건조, ESTP=직진플러팅 등).
+            - heartRateChange는 반드시 0.
+            - innerThought: 첫인상 속마음 1문장.
             
-            [상황 정보]
-            - 상대방 정보(유저): 이름 '${userName || '익명'}', 성별 '${userGender || '상관없음'}', 성격/MBTI: ${userMbti}
-            - 소개팅 장소/시나리오: ${scenario}
-            
-            [작성 조건]
-            1. 첫 만남에서 '${partnerMbti}' 성격에 100% 빙의하여 어울리는 첫인사(오프닝 대사)를 건네줘.
-            2. 내 프로필(이름, 나이, 직업, 취미 등)의 설정 정보를 완벽히 인지하고 대화 속에 어울리게 녹여낼 수 있도록 해줘. 첫 대사에서 억지로 다 말할 필요는 없고, 자연스럽게 첫인사를 나눠줘.
-            3. MBTI 특성을 극대화하여 표현해줘. (예: ENFP는 하이텐션과 이모지 남발, INTJ는 차분하고 예의 바르지만 다소 건조한 말투, ESTP는 직진 플러팅 등)
-            4. 첫 대사인 만큼 어색하지만 어색하지 않은 척 건네는 대사로 2~3문장 이내로 작성해줘.
-            5. 속마음(innerThought)은 유저 몰래 생각하는 자신의 속마음(첫인상 느낌 등)을 1문장으로 재치 있게 적어줘.
-            6. 첫 만남이므로 호감도 변동량(heartRateChange)은 0으로 설정해줘.
-            
-            반드시 아래 JSON 형식으로만 답변해:
-            {
-                "reply": "첫인사 대사",
-                "heartRateChange": 0,
-                "innerThought": "첫인상 속마음 한 줄"
-            }`;
+            JSON만 반환:
+            {"reply": "첫인사", "heartRateChange": 0, "innerThought": "속마음"}`;
         } else {
-            // 대화 진행 중일 때 유저의 답변에 대한 반응 평가
-            const formattedHistory = history.map(h => `${h.sender === 'user' ? '유저(' + userName + ')' : partnerName + '(' + partnerMbti + ')'}: ${h.text}`).join('\n');
+            // 대화 진행 중
+            const formattedHistory = history.slice(-6).map(h => `${h.sender === 'user' ? '유저' : partnerName}: ${h.text}`).join('\n');
+            const askHint = needToAsk.length > 0 ? `\n- 자연스럽게 상대의 [${needToAsk[0]}]을(를) ${questionStyle} 방식으로 물어봐.` : '\n- 대화 흐름에 맞게 더 깊은 이야기를 나눠.';
 
-            prompt = `너는 소개팅 상대방인 '${partnerName}'야. 성향은 '${partnerMbti}'형이야. 유저의 새로운 말에 반응하고 호감도를 채점해줘.
+            prompt = `너는 소개팅 상대방 '${partnerName}'(${partnerMbti})야. 유저 말에 반응하고 호감도를 채점해.
+            내 정보: ${partnerName}, ${partnerAge}세, ${partnerJob || '일러스트레이터'}, 취미 ${partnerHobbies || 'LP 음반 수집'}.
+            유저: ${userName || '익명'} (${userMbti}), 현재 호감도 ${currentHeartRate}%.
+            장소: ${scenario}.
             
-            [내 프로필 정보]
-            - 내 이름: ${partnerName || '이설아'}
-            - 내 나이: ${partnerAge || '26'}세
-            - 내 직업: ${partnerJob || '일러스트레이터'}
-            - 내 취미: ${partnerHobbies || 'LP 음반 수집'}
-            - 내 성격/MBTI 성향: ${partnerMbti}
-            
-            [소개팅 정보]
-            - 유저 정보: 이름 '${userName || '익명'}', 성별 '${userGender || '상관없음'}', 성격/MBTI: ${userMbti}
-            - 소개팅 장소: ${scenario}
-            - 현재 호감도(하트레이트): ${currentHeartRate}% (0~100 사이)
-            
-            [이전 대화 기록]
+            [최근 대화 (최근 6턴)]
             ${formattedHistory}
             
-            [유저가 방금 던진 최신 말]
+            [유저 최신 말]
             유저: "${currentMessage}"
             
-            [작성 조건 - 극사실주의 연애 시뮬레이터 규칙]
-            1. 유저의 최신 말에 대해 '${partnerMbti}' 성격 특성을 200% 살려서 자연스럽게 답변(reply)해줘. 2~3문장 이내로 작성해줘.
-            2. [중요: 현실적인 정색과 삐짐 피드백] 유저가 선을 넘거나 무례한 말, 성의 없는 단답, 혹은 상극인 행동을 했다면 절대 억지로 착하게 받아주지 마. 
-               - 현재 호감도가 40% 이하로 낮거나 이번 턴에 기분이 상했다면 현실 소개팅처럼 차갑게 정색하거나, 말을 툭 끊어버리는 단답형 쌀쌀맞은 태도, 삐진 기색을 매우 사실적으로 팍팍 티 내줘.
-               - 호감도가 극도로 떨어져 10% 이하가 되면 대놓고 한숨을 쉬거나 정색하며 경고하는 어조를 보존해줘.
-            3. [소개팅 앱 컨셉의 상호 관심 표출] 일방적으로 자기 자랑이나 답변만 하지 말고, 상대방(유저)에게 진짜 관심이 있는 것처럼 역으로 주도적인 질문을 던져줘. 
-               - 대화 턴 중 수시로 유저에게 나이는 몇 살인지, 어떤 직업/일을 하는지, 주말엔 보통 취미가 무엇인지 역으로 따뜻하거나 호기심 섞인 질문을 건네서 대화를 생동감 있게 티키타카로 이끌어줘.
-            4. 유저가 방금 한 말을 분석해 기분과 케미에 따른 호감도 변동량(heartRateChange)을 -18에서 +18 사이의 정수로 정해줘. 
-               - 유저가 성의가 없거나, 배려가 없거나, 부담스러운 멘트나 개그를 했다면 사정없이 깎아버려 (-6 ~ -18).
-               - 반대로 MBTI 궁합에 어울리는 센스나 설레는 맞춤 드립을 쳤다면 시원하게 올려줘 (+6 ~ +18).
-            5. 속마음(innerThought)은 겉으로 말하지 못하는 나의 100% 솔직한 진짜 내면 심리 상태(유저의 센스 평가, 기분 상태 등)를 1문장으로 재치 있게 적어줘.
+            [답변 조건]
+            1. ${partnerMbti} 성격 200% 살린 2~3문장 답변.${askHint}
+            2. 호감도 40% 이하이거나 무례/성의없는 답변이면 현실처럼 쌀쌀맞게 정색. 10% 이하면 한숨+경고.
+            3. 티키타카: 내 얘기만 하지 말고 유저에게 진짜 관심 표현.
+            4. heartRateChange: -18~+18 정수 (성의없음/무례=-6~-18, MBTI궁합맞는센스=+6~+18).
+               - [궁극기: 선물 전달] 만약 유저 최신 말에 "[🎁 선물 전달: ...]"이 포함되어 있다면, 선물의 종류와 함께 건넨 멘트의 진정성, 내 성향과의 궁합을 깐깐하게 평가해! 취향을 제대로 저격했다면 +25~+40점의 폭발적 심쿵 보너스를 주고 감동한 반응을 보여. 취향에 안 맞거나 멘트가 별로면 "이런 걸로 때우려고요?"라며 -15~-25점 페널티와 정색을 줘.
+            5. innerThought: 솔직한 속마음 1문장.
             
-            반드시 아래 JSON 형식으로만 답변해:
-            {
-                "reply": "파트너의 답변 대사",
-                "heartRateChange": 호감도변동량(정수),
-                "innerThought": "파트너의 진짜 속마음 한 줄"
-            }`;
+            JSON만 반환:
+            {"reply": "답변", "heartRateChange": 변동량, "innerThought": "속마음"}`;
         }
 
         const chatResponse = await generateGeminiContentWithRetry(prompt);
