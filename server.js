@@ -125,20 +125,22 @@ app.get('/assets/:filename', (req, res) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction (회복력 극대화)
-// 🚀 속도 최적화: gemini-2.0-flash 1순위, 2.5-flash는 Thinking 완전 비활성화
-async function generateGeminiContentWithRetry(prompt, retries = 2) {
-    // 모델 설정: 속도 우선 순서 (2.0-flash가 가장 빠름)
+// 🚀 무료티어 최적화: RPM 폭탄 방지 - 재시도 딜레이 대폭 증가, 모델별 1회 시도
+async function generateGeminiContentWithRetry(prompt, retries = 1) {
+    // 모델 설정: 무료 티어 안정성 우선 순서
+    // gemini-1.5-flash: 무료 RPM 15, 일 1500회 → 가장 넉넉함
+    // gemini-2.0-flash: 무료 RPM 10, 일 200회
+    // gemini-2.5-flash: 무료 RPM 10, 일 25회 → 최후 수단
     const modelConfigs = [
-        { 
-            name: "gemini-2.0-flash", 
-            config: { responseMimeType: "application/json" }
-        },
         { 
             name: "gemini-1.5-flash", 
             config: { responseMimeType: "application/json" }
         },
         { 
-            // 2.5-flash는 Thinking 완전 비활성화하여 속도 개선
+            name: "gemini-2.0-flash", 
+            config: { responseMimeType: "application/json" }
+        },
+        { 
             name: "gemini-2.5-flash", 
             config: { responseMimeType: "application/json" },
             thinkingConfig: { thinkingBudget: 0 }
@@ -154,7 +156,6 @@ async function generateGeminiContentWithRetry(prompt, retries = 2) {
                     model: modelCfg.name,
                     generationConfig: modelCfg.config
                 };
-                // 2.5-flash의 경우 Thinking 비활성화 적용
                 if (modelCfg.thinkingConfig) {
                     modelOptions.generationConfig = {
                         ...modelCfg.config,
@@ -166,10 +167,8 @@ async function generateGeminiContentWithRetry(prompt, retries = 2) {
                 const response = await result.response;
                 let text = response.text().trim();
                 
-                // Clean up markdown block if present
                 text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
                 
-                // Extract strictly from { to } (Safe JSON boundaries)
                 const startIndex = text.indexOf('{');
                 const endIndex = text.lastIndexOf('}');
                 if (startIndex !== -1 && endIndex !== -1) {
@@ -184,7 +183,7 @@ async function generateGeminiContentWithRetry(prompt, retries = 2) {
                 const isRateLimit = cleanErrorMessage.includes('429') || cleanErrorMessage.toLowerCase().includes('quota') || cleanErrorMessage.toLowerCase().includes('limit') || cleanErrorMessage.toLowerCase().includes('exhausted');
                 
                 if (isRateLimit) {
-                    cleanErrorMessage = '429 Too Many Requests (RPM Limit Exceeded: 약 15초 후 다시 시도해 주세요.)';
+                    cleanErrorMessage = '429 Too Many Requests (RPM Limit Exceeded)';
                 } else if (cleanErrorMessage.length > 150) {
                     cleanErrorMessage = cleanErrorMessage.substring(0, 150) + '...';
                 }
@@ -193,9 +192,12 @@ async function generateGeminiContentWithRetry(prompt, retries = 2) {
                 errors.push(`${modelCfg.name} (Attempt ${attempt}): ${cleanErrorMessage}`);
                 
                 if (attempt <= retries) {
-                    const delay = isRateLimit ? (2000 * attempt) : 500;
+                    // 429 발생 시 20초 대기 - RPM 폭탄 방지 핵심
+                    const delay = isRateLimit ? (20000 * attempt) : 1000;
                     console.log(`[Gemini] Waiting ${delay}ms before next retry attempt...`);
                     await new Promise(resolve => setTimeout(resolve, delay));
+                } else if (isRateLimit) {
+                    console.log(`[Gemini] Rate limit on ${modelCfg.name}, switching to next model...`);
                 }
             }
         }
