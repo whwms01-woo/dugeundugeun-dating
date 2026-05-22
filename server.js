@@ -193,7 +193,7 @@ async function generateGeminiContentWithRetry(prompt) {
         }
     }
     
-    throw new Error(`429: 모든 AI 모델 호출 실패:\n- ${errors.join('\n- ')}`);
+    throw new Error(`AI 모델 호출 실패: ${errors.join(' / ')}`);
 }
 
 
