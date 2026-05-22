@@ -127,13 +127,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 // Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction (회복력 극대화)
 // 🚀 무료티어 최적화: RPM 폭탄 방지 - 재시도 딜레이 대폭 증가, 모델별 1회 시도
 async function generateGeminiContentWithRetry(prompt, retries = 1) {
-    // 모델 설정: 무료 티어 안정성 우선 순서
-    // gemini-1.5-flash: 무료 RPM 15, 일 1500회 → 가장 넉넉함
-    // gemini-2.0-flash: 무료 RPM 10, 일 200회
-    // gemini-2.5-flash: 무료 RPM 10, 일 25회 → 최후 수단
+    // 모델 설정: 이 API 키에서 실제 사용 가능한 모델만 사용
+    // gemini-2.0-flash-lite: 무료 RPD 1500회, RPM 30 → 가장 넉넉함 ✅
+    // gemini-2.0-flash: 무료 RPD 200회, RPM 15
+    // gemini-2.5-flash: 무료 RPD 25회 → 최후 수단
     const modelConfigs = [
         { 
-            name: "gemini-1.5-flash", 
+            name: "gemini-2.0-flash-lite", 
             config: { responseMimeType: "application/json" }
         },
         { 
