@@ -2862,8 +2862,9 @@
                 
                 // Format a highly customized and user-friendly error message based on the status code/type
                 let friendlyMsg = error.message;
-                if (friendlyMsg.includes('429') || friendlyMsg.toLowerCase().includes('quota') || friendlyMsg.toLowerCase().includes('limit')) {
-                    friendlyMsg = "⚠️ [AI 대화량 한도 도달] 현재 무료 체험 API 호출 한도(429 Rate Limit)를 순간 초과했습니다! 약 15~30초간 머리를 식히신 뒤, 아래 '다시 시도하기' 버튼을 눌러주시면 대화가 정상적으로 이어집니다. 💖";
+                const isActualRateLimit = friendlyMsg.includes('429') || friendlyMsg.toLowerCase().includes('quota') || friendlyMsg.toLowerCase().includes('rate limit') || friendlyMsg.toLowerCase().includes('too many requests');
+                if (isActualRateLimit) {
+                    friendlyMsg = `⚠️ [AI 대화량 한도 도달] 현재 무료 체험 API 호출 한도(429 Rate Limit)를 순간 초과했습니다! 약 15~30초간 머리를 식히신 뒤, 아래 '다시 시도하기' 버튼을 눌러주시면 대화가 정상적으로 이어집니다. 💖`;
                 } else {
                     friendlyMsg = `⚠️ [소개팅 연결 지연] 대화 전송 중 통신 불안정이 감지되었습니다. 아래 '다시 시도하기' 버튼을 클릭해 대화를 재전송해 주세요! (${error.message})`;
                 }
