@@ -142,8 +142,7 @@ async function generateGeminiContentWithRetry(prompt) {
         },
         { 
             name: "gemini-2.5-flash", 
-            config: { responseMimeType: "application/json" },
-            thinkingConfig: { thinkingBudget: 0 }
+            config: { responseMimeType: "application/json" }
         }
     ];
     const errors = [];
@@ -155,12 +154,6 @@ async function generateGeminiContentWithRetry(prompt) {
                 model: modelCfg.name,
                 generationConfig: modelCfg.config
             };
-            if (modelCfg.thinkingConfig) {
-                modelOptions.generationConfig = {
-                    ...modelCfg.config,
-                    ...modelCfg.thinkingConfig
-                };
-            }
             const model = genAI.getGenerativeModel(modelOptions);
             const result = await model.generateContent(prompt);
             const response = await result.response;
