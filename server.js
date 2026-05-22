@@ -124,9 +124,9 @@ app.get('/assets/:filename', (req, res) => {
 // 제미나이 API 초기화
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction (회복력 극대화)
-// 🚀 무료티어 최적화: RPM 폭탄 방지 - 재시도 딜레이 대폭 증가, 모델별 1회 시도
-async function generateGeminiContentWithRetry(prompt, retries = 1) {
+// Robust Gemini Helper with Model Fallbacks and Safe JSON Extraction
+// 🚀 전략: 429 발생 시 즉시 다음 모델로 이동 (대기 없음), 각 모델 1번만 시도
+async function generateGeminiContentWithRetry(prompt) {
     // 모델 설정: 이 API 키에서 실제 사용 가능한 모델만 사용
     // gemini-2.0-flash-lite: 무료 RPD 1500회, RPM 30 → 가장 넉넉함 ✅
     // gemini-2.0-flash: 무료 RPD 200회, RPM 15
@@ -149,62 +149,53 @@ async function generateGeminiContentWithRetry(prompt, retries = 1) {
     const errors = [];
 
     for (const modelCfg of modelConfigs) {
-        for (let attempt = 1; attempt <= retries + 1; attempt++) {
-            try {
-                console.log(`[Gemini] Attempting generation with model: ${modelCfg.name} (Attempt ${attempt})...`);
-                const modelOptions = { 
-                    model: modelCfg.name,
-                    generationConfig: modelCfg.config
+        try {
+            console.log(`[Gemini] Trying model: ${modelCfg.name}...`);
+            const modelOptions = { 
+                model: modelCfg.name,
+                generationConfig: modelCfg.config
+            };
+            if (modelCfg.thinkingConfig) {
+                modelOptions.generationConfig = {
+                    ...modelCfg.config,
+                    ...modelCfg.thinkingConfig
                 };
-                if (modelCfg.thinkingConfig) {
-                    modelOptions.generationConfig = {
-                        ...modelCfg.config,
-                        ...modelCfg.thinkingConfig
-                    };
-                }
-                const model = genAI.getGenerativeModel(modelOptions);
-                const result = await model.generateContent(prompt);
-                const response = await result.response;
-                let text = response.text().trim();
-                
-                text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-                
-                const startIndex = text.indexOf('{');
-                const endIndex = text.lastIndexOf('}');
-                if (startIndex !== -1 && endIndex !== -1) {
-                    text = text.substring(startIndex, endIndex + 1);
-                }
-                
-                const jsonResult = JSON.parse(text);
-                console.log(`[Gemini] Successfully generated and parsed content using model: ${modelCfg.name}!`);
-                return jsonResult;
-            } catch (err) {
-                let cleanErrorMessage = err.message;
-                const isRateLimit = cleanErrorMessage.includes('429') || cleanErrorMessage.toLowerCase().includes('quota') || cleanErrorMessage.toLowerCase().includes('limit') || cleanErrorMessage.toLowerCase().includes('exhausted');
-                
-                if (isRateLimit) {
-                    cleanErrorMessage = '429 Too Many Requests (RPM Limit Exceeded)';
-                } else if (cleanErrorMessage.length > 150) {
-                    cleanErrorMessage = cleanErrorMessage.substring(0, 150) + '...';
-                }
-                
-                console.error(`[Gemini] Model ${modelCfg.name} (Attempt ${attempt}) failed:`, cleanErrorMessage);
-                errors.push(`${modelCfg.name} (Attempt ${attempt}): ${cleanErrorMessage}`);
-                
-                if (attempt <= retries) {
-                    // 429 발생 시 20초 대기 - RPM 폭탄 방지 핵심
-                    const delay = isRateLimit ? (20000 * attempt) : 1000;
-                    console.log(`[Gemini] Waiting ${delay}ms before next retry attempt...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else if (isRateLimit) {
-                    console.log(`[Gemini] Rate limit on ${modelCfg.name}, switching to next model...`);
-                }
             }
+            const model = genAI.getGenerativeModel(modelOptions);
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            let text = response.text().trim();
+            
+            text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+            
+            const startIndex = text.indexOf('{');
+            const endIndex = text.lastIndexOf('}');
+            if (startIndex !== -1 && endIndex !== -1) {
+                text = text.substring(startIndex, endIndex + 1);
+            }
+            
+            const jsonResult = JSON.parse(text);
+            console.log(`[Gemini] ✅ Success with model: ${modelCfg.name}`);
+            return jsonResult;
+        } catch (err) {
+            const errMsg = err.message || '';
+            // 정확한 429/quota 감지 (너무 광범위한 'limit' 단어 제거)
+            const isRateLimit = errMsg.includes('429') || 
+                                errMsg.toLowerCase().includes('quota') || 
+                                errMsg.toLowerCase().includes('rate limit') ||
+                                errMsg.toLowerCase().includes('too many requests') ||
+                                errMsg.toLowerCase().includes('exhausted');
+            
+            const shortErr = isRateLimit ? '429 Rate Limit' : errMsg.substring(0, 100);
+            console.error(`[Gemini] ❌ ${modelCfg.name} failed: ${shortErr}`);
+            errors.push(`${modelCfg.name}: ${shortErr}`);
+            // 429든 다른 에러든 즉시 다음 모델로 이동 (대기 없음)
         }
     }
     
-    throw new Error(`모든 AI 모델 호출 실패:\n- ${errors.join('\n- ')}`);
+    throw new Error(`429: 모든 AI 모델 호출 실패:\n- ${errors.join('\n- ')}`);
 }
+
 
 // 1. 실시간 대화 및 호감도 평가 API
 app.post('/api/chat', async (req, res) => {
