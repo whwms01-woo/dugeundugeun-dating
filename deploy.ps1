@@ -9,7 +9,7 @@ Write-Host "[Step 1] Packing code files (git add .)..." -ForegroundColor Yellow
 git add .
 
 # 2. Git Commit
-$commitMsg = "feat: enhance heartbeat ASMR frequencies and implement high-suspense ticking clock audio"
+$commitMsg = "fix: update Gemini API key to resolve quota exceeded error"
 Write-Host "[Step 2] Creating git commit..." -ForegroundColor Yellow
 git commit -m $commitMsg
 
